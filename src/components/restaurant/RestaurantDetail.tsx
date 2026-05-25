@@ -3,14 +3,21 @@ import {
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
+import type { RouteSummary } from '@/lib/api/directions'
 import { VerificationBadge } from './VerificationBadge'
 
 interface Props {
   restaurant: Restaurant
   saved: boolean
+  dirLoading: boolean
+  routeSummary: RouteSummary | null
   onToggleSave: (id: string) => void
+  onDirections: (restaurant: Restaurant) => void
   onBack: () => void
 }
+
+const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`)
+const fmtDur = (s: number) => `${Math.round(s / 60)}분`
 
 /**
  * 사이드바 상세 패널. 카드(또는 마커) 클릭 시 목록 대신 표시된다.
@@ -19,7 +26,10 @@ interface Props {
 export function RestaurantDetail({
   restaurant,
   saved,
+  dirLoading,
+  routeSummary,
   onToggleSave,
+  onDirections,
   onBack,
 }: Props) {
   const primary = primaryVerification(restaurant)
@@ -112,31 +122,59 @@ export function RestaurantDetail({
       </div>
 
       {/* 행동 전환 CTA — 항상 보이도록 하단 sticky 고정 */}
-      <div className="sticky bottom-0 flex gap-2 border-t border-gray-100 bg-white/95 p-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)] backdrop-blur">
-        {/* 1) 📍 길찾기 → 카카오맵 검색 */}
+      <div className="sticky bottom-0 border-t border-gray-100 bg-white/95 p-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)] backdrop-blur">
+        {/* 경로 요약 (인앱 자동차 길찾기 결과) */}
+        {routeSummary && (
+          <div className="mb-2 flex items-center justify-center gap-2 rounded-lg bg-gray-50 py-1.5 text-xs font-semibold text-gray-700">
+            <span aria-hidden>🚗</span>
+            <span>{fmtDist(routeSummary.distance)}</span>
+            <span className="text-gray-300">·</span>
+            <span>{fmtDur(routeSummary.duration)}</span>
+            {routeSummary.taxiFare != null && (
+              <>
+                <span className="text-gray-300">·</span>
+                <span>택시 {routeSummary.taxiFare.toLocaleString()}원</span>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          {/* 1) 📍 길찾기 → 인앱 자동차 경로 (지도에 표시) */}
+          <button
+            type="button"
+            onClick={() => onDirections(restaurant)}
+            disabled={dirLoading}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
+            style={{ backgroundColor: accent }}
+          >
+            {dirLoading ? '경로 찾는 중…' : '📍 길찾기'}
+          </button>
+
+          {/* 2) ★ 저장하기 / 저장됨 → useSavedRestaurants 연결 */}
+          <button
+            type="button"
+            onClick={() => onToggleSave(restaurant.id)}
+            aria-pressed={saved}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-bold transition-colors ${
+              saved
+                ? 'bg-amber-400 text-white hover:bg-amber-500'
+                : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            {saved ? '★ 저장됨' : '☆ 저장하기'}
+          </button>
+        </div>
+
+        {/* 대중교통·도보는 카카오맵으로 (자동차 외 경로) */}
         <a
           href={kakaoMapUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
-          style={{ backgroundColor: accent }}
+          className="mt-2 block text-center text-xs text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline"
         >
-          📍 길찾기
+          대중교통·도보는 카카오맵에서 열기 →
         </a>
-
-        {/* 2) ★ 저장하기 / 저장됨 → useSavedRestaurants 연결 */}
-        <button
-          type="button"
-          onClick={() => onToggleSave(restaurant.id)}
-          aria-pressed={saved}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-bold transition-colors ${
-            saved
-              ? 'bg-amber-400 text-white hover:bg-amber-500'
-              : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          {saved ? '★ 저장됨' : '☆ 저장하기'}
-        </button>
       </div>
     </div>
   )

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { fetchRestaurants, type DataSource } from '@/lib/api/restaurants'
-import { RESTAURANTS, type FilterValue, type Restaurant } from '@/lib/mock/restaurants'
+import { type FilterValue, type Restaurant } from '@/lib/mock/restaurants'
+import { RESTAURANT_DATASET } from '@/lib/data/restaurants'
 
 export type FetchState = DataSource | 'loading'
 
@@ -14,8 +15,10 @@ export type FetchState = DataSource | 'loading'
 export function useRestaurants(filter: FilterValue) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() =>
     filter === 'all'
-      ? RESTAURANTS
-      : RESTAURANTS.filter((r) => r.verifications.some((v) => v.code === filter)),
+      ? RESTAURANT_DATASET
+      : RESTAURANT_DATASET.filter((r) =>
+          r.verifications.some((v) => v.code === filter),
+        ),
   )
   const [state, setState] = useState<FetchState>('loading')
 

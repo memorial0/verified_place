@@ -1,9 +1,9 @@
 import {
-  RESTAURANTS,
   type FilterValue,
   type Restaurant,
   type VerificationCode,
 } from '@/lib/mock/restaurants'
+import { RESTAURANT_DATASET } from '@/lib/data/restaurants'
 
 // ---- GET /api/restaurants 응답 형태 (snake_case, DB Row 기반) ----------------
 interface ApiVerification {
@@ -68,7 +68,10 @@ export async function fetchRestaurants(
     const res = await fetch(`/api/restaurants${qs}`, { cache: 'no-store' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const json = (await res.json()) as { data?: ApiRestaurant[] }
-    return { restaurants: (json.data ?? []).map(mapApiRestaurant), source: 'live' }
+    const mapped = (json.data ?? []).map(mapApiRestaurant)
+    // 라이브가 비어 있으면(아직 미시드/미연결) Mock 데이터셋을 유지 → 화면이 비지 않음
+    if (mapped.length === 0) return { restaurants: filterMock(filter), source: 'fallback' }
+    return { restaurants: mapped, source: 'live' }
   } catch {
     return { restaurants: filterMock(filter), source: 'fallback' }
   }
@@ -76,6 +79,8 @@ export async function fetchRestaurants(
 
 function filterMock(filter: FilterValue): Restaurant[] {
   return filter === 'all'
-    ? RESTAURANTS
-    : RESTAURANTS.filter((r) => r.verifications.some((v) => v.code === filter))
+    ? RESTAURANT_DATASET
+    : RESTAURANT_DATASET.filter((r) =>
+        r.verifications.some((v) => v.code === filter),
+      )
 }

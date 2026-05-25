@@ -1,12 +1,18 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Map, CustomOverlayMap, useKakaoLoader } from 'react-kakao-maps-sdk'
+import {
+  Map,
+  CustomOverlayMap,
+  Polyline,
+  useKakaoLoader,
+} from 'react-kakao-maps-sdk'
 import {
   VERIFICATION_META,
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
+import type { LatLng } from '@/lib/api/directions'
 
 const SEOUL_CENTER = { lat: 37.5547, lng: 126.9897 }
 
@@ -16,6 +22,8 @@ interface Props {
   activeId: string | null
   /** 클릭으로 고정 선택된 식당 → 지도 panTo 트리거 */
   selectedId: string | null
+  /** 길찾기 경로 (출발지 + 경로 좌표). 있으면 폴리라인 표시 */
+  route: { origin: LatLng; path: LatLng[] } | null
   onSelect: (id: string | null) => void
 }
 
@@ -23,6 +31,7 @@ export function RestaurantMap({
   restaurants,
   activeId,
   selectedId,
+  route,
   onSelect,
 }: Props) {
   const [loading, error] = useKakaoLoader({
@@ -40,6 +49,17 @@ export function RestaurantMap({
     if (!kakao) return
     mapRef.current.panTo(new kakao.maps.LatLng(r.lat, r.lng))
   }, [selectedId, restaurants])
+
+  // 경로가 생기면 출발지+도착지가 모두 보이도록 지도 범위 맞춤
+  useEffect(() => {
+    if (!route || !mapRef.current || route.path.length === 0) return
+    const kakao = (window as any).kakao
+    if (!kakao) return
+    const bounds = new kakao.maps.LatLngBounds()
+    bounds.extend(new kakao.maps.LatLng(route.origin.lat, route.origin.lng))
+    route.path.forEach((p) => bounds.extend(new kakao.maps.LatLng(p.lat, p.lng)))
+    mapRef.current.setBounds(bounds)
+  }, [route])
 
   const active = restaurants.find((r) => r.id === activeId) ?? null
 
@@ -94,6 +114,23 @@ export function RestaurantMap({
         >
           <PopupCard restaurant={active} onClose={() => onSelect(null)} />
         </CustomOverlayMap>
+      )}
+
+      {route && (
+        <>
+          <Polyline
+            path={route.path}
+            strokeWeight={5}
+            strokeColor="#C4002B"
+            strokeOpacity={0.85}
+            strokeStyle="solid"
+          />
+          <CustomOverlayMap position={route.origin} yAnchor={1.4} zIndex={45}>
+            <div className="rounded-full bg-gray-900 px-2 py-1 text-xs font-bold text-white shadow-md">
+              출발
+            </div>
+          </CustomOverlayMap>
+        </>
       )}
     </Map>
   )

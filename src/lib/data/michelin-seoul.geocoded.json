@@ -1,0 +1,101 @@
+[
+  {
+    "nameKo": "밍글스",
+    "nameEn": "Mingles",
+    "stars": 3,
+    "year": 2025,
+    "placeName": "밍글스",
+    "addressRoad": "서울 강남구 도산대로67길 19",
+    "category": "음식점 > 한식",
+    "lat": 37.52541969265465,
+    "lng": 127.04410633651611
+  },
+  {
+    "nameKo": "정식당",
+    "nameEn": "Jungsik",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "정식당",
+    "addressRoad": "서울 강남구 선릉로158길 11",
+    "category": "음식점 > 퓨전요리 > 퓨전한식",
+    "lat": 37.52561179957907,
+    "lng": 127.04107121829333
+  },
+  {
+    "nameKo": "라연",
+    "nameEn": "La Yeon",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "서울신라호텔 라연",
+    "addressRoad": "서울 중구 동호로 249",
+    "category": "음식점 > 한식",
+    "lat": 37.5558969290908,
+    "lng": 127.005169790093
+  },
+  {
+    "nameKo": "권숙수",
+    "nameEn": "Kwonsooksoo",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "권숙수",
+    "addressRoad": "서울 강남구 압구정로80길 37",
+    "category": "음식점 > 한식",
+    "lat": 37.52437202380092,
+    "lng": 127.04357628821981
+  },
+  {
+    "nameKo": "스와니예",
+    "nameEn": "Soigné",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "스와니예 컴퍼니",
+    "addressRoad": "서울 서초구 강남대로 341",
+    "category": "가정,생활 > 식품판매",
+    "lat": 37.4932548079047,
+    "lng": 127.029362209752
+  },
+  {
+    "nameKo": "미토우",
+    "nameEn": "Mitou",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "미토우",
+    "addressRoad": "서울 강남구 도산대로70길 24",
+    "category": "음식점 > 일식",
+    "lat": 37.52211896630903,
+    "lng": 127.04504557668946
+  },
+  {
+    "nameKo": "알라 프리마",
+    "nameEn": "Alla Prima",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "알라프리마",
+    "addressRoad": "서울 강남구 학동로17길 13",
+    "category": "음식점 > 양식",
+    "lat": 37.51353812649945,
+    "lng": 127.0260266212748
+  },
+  {
+    "nameKo": "에빗",
+    "nameEn": "Evett",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "에빗",
+    "addressRoad": "서울 강남구 도산대로45길 10-5",
+    "category": "음식점 > 양식",
+    "lat": 37.52338340192846,
+    "lng": 127.03623390719173
+  },
+  {
+    "nameKo": "레스토랑 알렌",
+    "nameEn": "Restaurant Allen",
+    "stars": 2,
+    "year": 2025,
+    "placeName": "레스토랑알렌",
+    "addressRoad": "서울 강남구 테헤란로 231",
+    "category": "음식점 > 양식",
+    "lat": 37.50347843657701,
+    "lng": 127.04165283886103
+  }
+]

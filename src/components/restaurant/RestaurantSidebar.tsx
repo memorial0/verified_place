@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import type { Restaurant } from '@/lib/mock/restaurants'
 import type { FetchState } from '@/lib/hooks/useRestaurants'
+import type { RouteSummary } from '@/lib/api/directions'
 import { RestaurantCard } from './RestaurantCard'
 import { RestaurantDetail } from './RestaurantDetail'
 
@@ -14,9 +15,12 @@ interface Props {
   state: FetchState
   savedCount: number
   isSaved: (id: string) => boolean
+  dirLoading: boolean
+  routeSummary: RouteSummary | null
   onHover: (id: string | null) => void
   onSelect: (id: string | null) => void
   onToggleSave: (id: string) => void
+  onDirections: (restaurant: Restaurant) => void
 }
 
 export function RestaurantSidebar({
@@ -26,9 +30,12 @@ export function RestaurantSidebar({
   state,
   savedCount,
   isSaved,
+  dirLoading,
+  routeSummary,
   onHover,
   onSelect,
   onToggleSave,
+  onDirections,
 }: Props) {
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -51,7 +58,10 @@ export function RestaurantSidebar({
         <RestaurantDetail
           restaurant={selected}
           saved={isSaved(selected.id)}
+          dirLoading={dirLoading}
+          routeSummary={routeSummary}
           onToggleSave={onToggleSave}
+          onDirections={onDirections}
           onBack={() => onSelect(null)}
         />
       ) : (
