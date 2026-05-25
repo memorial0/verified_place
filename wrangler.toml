@@ -1,0 +1,5 @@
+# Cloudflare Pages 설정 (Git 연결 빌드 시 출력 경로/호환성 플래그를 여기서 인식)
+name = "verified-place"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
