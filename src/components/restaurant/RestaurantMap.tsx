@@ -15,21 +15,28 @@ const SEOUL_CENTER = { lat: 37.5547, lng: 126.9897 }
 
 interface Props {
   restaurants: Restaurant[]
-  /** 오버레이를 띄울 식당(hover 또는 클릭) */
+  /** 오버레이/강조 대상 (hover ?? preview ?? selected) */
   activeId: string | null
-  /** 클릭으로 고정 선택된 식당 → 지도 panTo 트리거 */
+  /** panTo 대상 (preview ?? selected) */
   selectedId: string | null
+  /** 미니시트로 미리보기 중인 식당 — hover 팝업 중복 방지 */
+  previewId: string | null
   /** 길찾기 경로 (출발지 + 경로 좌표). 있으면 폴리라인 표시 */
   route: { origin: LatLng; path: LatLng[] } | null
-  onSelect: (id: string | null) => void
+  /** 마커 클릭 → 미니시트 미리보기 */
+  onPreview: (id: string | null) => void
+  /** 빈 지도 클릭/팝업 닫기 → 선택 해제 */
+  onClear: () => void
 }
 
 export function RestaurantMap({
   restaurants,
   activeId,
   selectedId,
+  previewId,
   route,
-  onSelect,
+  onPreview,
+  onClear,
 }: Props) {
   const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID ?? ''
   const { loaded, error } = useNaverMaps(clientId)
@@ -41,9 +48,9 @@ export function RestaurantMap({
   const polylineRef = useRef<any>(null)
   const [mapReady, setMapReady] = useState(false)
 
-  // 빈 지도 클릭 시 선택 해제 — 리스너 안에서 항상 최신 onSelect 를 쓰도록 ref 경유
-  const onSelectRef = useRef(onSelect)
-  onSelectRef.current = onSelect
+  // 빈 지도 클릭 시 선택 해제 — 리스너 안에서 항상 최신 onClear 를 쓰도록 ref 경유
+  const onClearRef = useRef(onClear)
+  onClearRef.current = onClear
 
   // SDK 로드 완료 후 지도 1회 생성
   useEffect(() => {
@@ -53,7 +60,7 @@ export function RestaurantMap({
       zoom: 11,
     })
     naver.maps.Event.addListener(mapRef.current, 'click', () =>
-      onSelectRef.current(null),
+      onClearRef.current(),
     )
     setMapReady(true)
   }, [loaded, naver])
@@ -130,12 +137,13 @@ export function RestaurantMap({
               <MarkerPin
                 restaurant={r}
                 active={activeId === r.id}
-                onClick={() => onSelect(r.id)}
+                onClick={() => onPreview(r.id)}
               />
             </MapOverlay>
           ))}
 
-          {active && (
+          {/* hover 정보 팝업 — 미니시트로 미리보기 중인 마커는 중복되므로 숨김 */}
+          {active && active.id !== previewId && (
             <MapOverlay
               map={mapRef.current}
               naver={naver}
@@ -143,7 +151,7 @@ export function RestaurantMap({
               yAnchor={1.55}
               zIndex={50}
             >
-              <PopupCard restaurant={active} onClose={() => onSelect(null)} />
+              <PopupCard restaurant={active} onClose={onClear} />
             </MapOverlay>
           )}
 

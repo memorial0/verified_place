@@ -40,3 +40,22 @@ export async function fetchDirections(
   if (!res.ok) throw new Error(`directions ${res.status}`)
   return res.json()
 }
+
+/**
+ * 여러 지점을 순서대로 잇는 자동차 경로 (코스 전체 길찾기).
+ * points[0]=출발, points[last]=도착, 중간은 경유지(네이버 최대 5 → 총 7지점).
+ */
+export async function fetchRouteThrough(points: LatLng[]): Promise<DirectionsResult> {
+  if (points.length < 2) throw new Error('경로에는 2지점 이상 필요')
+  const fmt = (p: LatLng) => `${p.lng},${p.lat}`
+  const params = new URLSearchParams({
+    origin: fmt(points[0]),
+    destination: fmt(points[points.length - 1]),
+  })
+  const vias = points.slice(1, -1)
+  if (vias.length > 0) params.set('waypoints', vias.map(fmt).join('|'))
+
+  const res = await fetch(`/api/directions?${params.toString()}`)
+  if (!res.ok) throw new Error(`directions ${res.status}`)
+  return res.json()
+}
