@@ -14,6 +14,7 @@ interface Props {
   selectedId: string | null
   state: FetchState
   savedCount: number
+  courseCount: number
   isSaved: (id: string) => boolean
   dirLoading: boolean
   routeSummary: RouteSummary | null
@@ -29,6 +30,7 @@ export function RestaurantSidebar({
   selectedId,
   state,
   savedCount,
+  courseCount,
   isSaved,
   dirLoading,
   routeSummary,
@@ -71,6 +73,9 @@ export function RestaurantSidebar({
               검증 식당 <span className="text-gray-400">{restaurants.length}곳</span>
               {savedCount > 0 && (
                 <span className="ml-2 text-amber-500">★ {savedCount}</span>
+              )}
+              {courseCount > 0 && (
+                <span className="ml-2 text-emerald-600">🧭 {courseCount}</span>
               )}
             </p>
             <SourceBadge state={state} />

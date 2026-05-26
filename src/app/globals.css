@@ -6,3 +6,15 @@ html,
 body {
   height: 100%;
 }
+
+/* 미니 바텀시트 등장 애니메이션 (RestaurantMiniSheet) */
+@keyframes slideUp {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
