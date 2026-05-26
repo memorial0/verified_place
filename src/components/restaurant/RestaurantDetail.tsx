@@ -53,7 +53,7 @@ export function RestaurantDetail({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <span className="text-xs font-medium text-gray-400">
           {restaurant.category}
         </span>

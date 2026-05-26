@@ -2,8 +2,8 @@ import { MapExplorer } from '@/components/restaurant/MapExplorer'
 
 export default function HomePage() {
   return (
-    <main className="flex h-screen flex-col bg-gray-50">
-      <header className="z-20 flex items-center gap-2 border-b border-gray-100 bg-white px-5 py-3 shadow-sm">
+    <main className="flex h-screen flex-col overflow-hidden bg-gray-50">
+      <header className="z-20 flex shrink-0 items-center gap-2 border-b border-gray-100 bg-white px-5 py-3 shadow-sm">
         <span className="text-xl" aria-hidden>
           🍽️
         </span>
@@ -17,7 +17,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="relative flex-1">
+      <div className="relative min-h-0 flex-1">
         <MapExplorer />
       </div>
     </main>
