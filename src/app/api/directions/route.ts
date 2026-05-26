@@ -4,13 +4,15 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'edge'
 
 /**
- * GET /api/directions?origin=lng,lat&destination=lng,lat
+ * GET /api/directions?origin=lng,lat&destination=lng,lat[&waypoints=lng,lat|lng,lat]
  * 네이버 Directions 5 자동차 길찾기 → 경로 좌표(path) + 요약(거리/시간/택시요금) 반환.
+ * waypoints(경유지, 최대 5)를 주면 코스 전체를 한 번에 잇는 경로를 반환한다.
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const origin = searchParams.get('origin')
   const destination = searchParams.get('destination')
+  const waypoints = searchParams.get('waypoints') // "lng,lat|lng,lat" (최대 5)
   if (!origin || !destination) {
     return NextResponse.json({ error: 'origin/destination 필요' }, { status: 400 })
   }
@@ -23,9 +25,14 @@ export async function GET(req: NextRequest) {
   }
 
   // start/goal 모두 "경도,위도(lng,lat)" 포맷. option=traoptimal: 실시간 최적 경로
-  const url =
+  let url =
     'https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving' +
     `?start=${encodeURIComponent(origin)}&goal=${encodeURIComponent(destination)}&option=traoptimal`
+  // 경유지: 네이버는 '|' 구분, 최대 5개
+  if (waypoints) {
+    const vias = waypoints.split('|').slice(0, 5).join('|')
+    url += `&waypoints=${encodeURIComponent(vias)}`
+  }
 
   const res = await fetch(url, {
     headers: {
