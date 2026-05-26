@@ -22,17 +22,6 @@
     "lng": 127.03480609700759
   },
   {
-    "nameKo": "낙원",
-    "ribbons": 3,
-    "year": 2026,
-    "region": "서울",
-    "placeName": "호반",
-    "addressRoad": "서울 종로구 삼일대로26길 20",
-    "category": "음식점 > 한식",
-    "lat": 37.5733001868081,
-    "lng": 126.989146348574
-  },
-  {
     "nameKo": "다이닝마",
     "ribbons": 3,
     "year": 2026,
@@ -297,14 +286,168 @@
     "lng": 127.028919050438
   },
   {
+    "nameKo": "밍글스",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "밍글스",
+    "addressRoad": "서울 강남구 도산대로67길 19",
+    "category": "음식점 > 한식",
+    "lat": 37.52541969265465,
+    "lng": 127.04410633651611
+  },
+  {
+    "nameKo": "정식당",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "정식당",
+    "addressRoad": "서울 강남구 선릉로158길 11",
+    "category": "음식점 > 퓨전요리 > 퓨전한식",
+    "lat": 37.52561179957907,
+    "lng": 127.04107121829333
+  },
+  {
+    "nameKo": "권숙수",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "권숙수",
+    "addressRoad": "서울 강남구 압구정로80길 37",
+    "category": "음식점 > 한식",
+    "lat": 37.52437202380092,
+    "lng": 127.04357628821981
+  },
+  {
+    "nameKo": "미토우",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "미토우",
+    "addressRoad": "서울 강남구 도산대로70길 24",
+    "category": "음식점 > 일식",
+    "lat": 37.52211896630903,
+    "lng": 127.04504557668946
+  },
+  {
+    "nameKo": "알라 프리마",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "알라프리마",
+    "addressRoad": "서울 강남구 학동로17길 13",
+    "category": "음식점 > 양식",
+    "lat": 37.51353812649945,
+    "lng": 127.0260266212748
+  },
+  {
+    "nameKo": "모수서울",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "모수 서울",
+    "addressRoad": "서울 용산구 회나무로41길 4",
+    "category": "음식점 > 양식",
+    "lat": 37.5411971867086,
+    "lng": 126.996181126207
+  },
+  {
+    "nameKo": "하네",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "하네",
+    "addressRoad": "서울 강남구 언주로172길 14",
+    "category": "음식점 > 일식 > 초밥,롤",
+    "lat": 37.5276365316183,
+    "lng": 127.034907802556
+  },
+  {
+    "nameKo": "호빈",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "앰배서더서울풀만 호빈",
+    "addressRoad": "서울 중구 동호로 287",
+    "category": "음식점 > 중식 > 중국요리",
+    "lat": 37.5601452228938,
+    "lng": 127.002248895826
+  },
+  {
+    "nameKo": "레스쁘아",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "레스쁘아",
+    "addressRoad": "서울 강남구 도산대로56길 10",
+    "category": "음식점 > 양식 > 프랑스음식",
+    "lat": 37.522445124497075,
+    "lng": 127.04005702719779
+  },
+  {
+    "nameKo": "아리아께",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "서울신라호텔 아리아께",
+    "addressRoad": "서울 중구 동호로 249",
+    "category": "음식점 > 일식",
+    "lat": 37.555817640857406,
+    "lng": 127.0051799702681
+  },
+  {
+    "nameKo": "온지음",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "온지음",
+    "addressRoad": "서울 종로구 효자로 49",
+    "category": "음식점 > 한식",
+    "lat": 37.580494739542516,
+    "lng": 126.97339071212892
+  },
+  {
+    "nameKo": "가겐",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "가겐by최준호",
+    "addressRoad": "서울 강남구 압구정로80길 19-1",
+    "category": "음식점 > 일식 > 일식집",
+    "lat": 37.5245020416634,
+    "lng": 127.04524498101
+  },
+  {
+    "nameKo": "소수헌",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "소수헌",
+    "addressRoad": "서울 중구 만리재로21길 8",
+    "category": "음식점 > 일식 > 일식집",
+    "lat": 37.5529550203514,
+    "lng": 126.963407745402
+  },
+  {
+    "nameKo": "명월관",
+    "ribbons": 3,
+    "year": 2026,
+    "region": "서울",
+    "placeName": "명월관",
+    "addressRoad": "서울 광진구 워커힐로 177",
+    "category": "음식점 > 한식 > 육류,고기",
+    "lat": 37.5529486459702,
+    "lng": 127.110481785089
+  },
+  {
     "nameKo": "한국의집",
     "ribbons": 3,
     "year": 2026,
     "region": "서울",
-    "placeName": "한국집 롯데백화점본점",
-    "addressRoad": "서울 중구 소공동 20-7",
+    "placeName": "한국의집",
+    "addressRoad": "서울 중구 퇴계로36길 10",
     "category": "음식점 > 한식",
-    "lat": 37.564404550241,
-    "lng": 126.981136270021
+    "lat": 37.5602235028532,
+    "lng": 126.994498291875
   }
 ]
