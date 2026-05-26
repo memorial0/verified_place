@@ -39,7 +39,14 @@ values
   ('홍보각', '서울 강남구 봉은사로 130', 37.5052752410458, 127.028919050438, (select id from public.categories where slug='chinese'), ARRAY['중식','강남구'], 'blue_ribbon', 'blue-ribbon-홍보각', 'published'),
   ('모수서울', '서울 용산구 회나무로41길 4', 37.5411971867086, 126.996181126207, (select id from public.categories where slug='western'), ARRAY['양식','용산구'], 'blue_ribbon', 'blue-ribbon-모수서울', 'published'),
   ('하네', '서울 강남구 언주로172길 14', 37.5276365316183, 127.034907802556, (select id from public.categories where slug='japanese'), ARRAY['초밥,롤','강남구'], 'blue_ribbon', 'blue-ribbon-하네', 'published'),
-  ('호빈', '서울 중구 동호로 287', 37.5601452228938, 127.002248895826, (select id from public.categories where slug='chinese'), ARRAY['중국요리','중구'], 'blue_ribbon', 'blue-ribbon-호빈', 'published');
+  ('호빈', '서울 중구 동호로 287', 37.5601452228938, 127.002248895826, (select id from public.categories where slug='chinese'), ARRAY['중국요리','중구'], 'blue_ribbon', 'blue-ribbon-호빈', 'published'),
+  ('레스쁘아', '서울 강남구 도산대로56길 10', 37.522445124497075, 127.04005702719779, (select id from public.categories where slug='western'), ARRAY['프랑스음식','강남구'], 'blue_ribbon', 'blue-ribbon-레스쁘아', 'published'),
+  ('아리아께', '서울 중구 동호로 249', 37.555817640857406, 127.0051799702681, (select id from public.categories where slug='japanese'), ARRAY['일식','중구'], 'blue_ribbon', 'blue-ribbon-아리아께', 'published'),
+  ('온지음', '서울 종로구 효자로 49', 37.580494739542516, 126.97339071212892, (select id from public.categories where slug='korean'), ARRAY['한식','종로구'], 'blue_ribbon', 'blue-ribbon-온지음', 'published'),
+  ('가겐', '서울 강남구 압구정로80길 19-1', 37.5245020416634, 127.04524498101, (select id from public.categories where slug='japanese'), ARRAY['일식집','강남구'], 'blue_ribbon', 'blue-ribbon-가겐', 'published'),
+  ('소수헌', '서울 중구 만리재로21길 8', 37.5529550203514, 126.963407745402, (select id from public.categories where slug='japanese'), ARRAY['일식집','중구'], 'blue_ribbon', 'blue-ribbon-소수헌', 'published'),
+  ('명월관', '서울 광진구 워커힐로 177', 37.5529486459702, 127.110481785089, (select id from public.categories where slug='korean'), ARRAY['육류,고기','광진구'], 'blue_ribbon', 'blue-ribbon-명월관', 'published'),
+  ('한국의집', '서울 중구 퇴계로36길 10', 37.5602235028532, 126.994498291875, (select id from public.categories where slug='korean'), ARRAY['한식','중구'], 'blue_ribbon', 'blue-ribbon-한국의집', 'published');
 
 insert into public.restaurant_verifications
   (restaurant_id, verification_type_id, rating, awarded_year, is_verified)
@@ -78,7 +85,14 @@ from (values
   ('알라 프리마', 3, 2026),
   ('모수서울', 3, 2026),
   ('하네', 3, 2026),
-  ('호빈', 3, 2026)
+  ('호빈', 3, 2026),
+  ('레스쁘아', 3, 2026),
+  ('아리아께', 3, 2026),
+  ('온지음', 3, 2026),
+  ('가겐', 3, 2026),
+  ('소수헌', 3, 2026),
+  ('명월관', 3, 2026),
+  ('한국의집', 3, 2026)
 ) as v(name, ribbons, year)
 join public.restaurants r on r.name = v.name
 join public.verification_types vt on vt.code = 'blue_ribbon';
