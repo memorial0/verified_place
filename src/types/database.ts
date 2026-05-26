@@ -17,6 +17,8 @@ export interface Restaurant {
   address_road: string | null
   latitude: number | null
   longitude: number | null
+  sido: string | null
+  sigungu: string | null
   phone: string | null
   category_id: number | null
   description: string | null

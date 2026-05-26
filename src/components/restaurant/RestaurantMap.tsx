@@ -11,7 +11,8 @@ import type { LatLng } from '@/lib/api/directions'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
 import { getReactOverlayClass } from '@/lib/naver/overlay'
 
-const SEOUL_CENTER = { lat: 37.5547, lng: 126.9897 }
+// 춘천 거점 — 기본 지도 중심
+const DEFAULT_CENTER = { lat: 37.8813, lng: 127.73 }
 
 interface Props {
   restaurants: Restaurant[]
@@ -56,8 +57,8 @@ export function RestaurantMap({
   useEffect(() => {
     if (!loaded || !naver || !containerRef.current || mapRef.current) return
     mapRef.current = new naver.maps.Map(containerRef.current, {
-      center: new naver.maps.LatLng(SEOUL_CENTER.lat, SEOUL_CENTER.lng),
-      zoom: 11,
+      center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+      zoom: 12,
     })
     naver.maps.Event.addListener(mapRef.current, 'click', () =>
       onClearRef.current(),
