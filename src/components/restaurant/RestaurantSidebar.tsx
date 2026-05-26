@@ -117,7 +117,7 @@ export function RestaurantSidebar({
         <SourceBadge state={state} />
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-4">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4">
         {restaurants.length === 0 ? (
           <p className="mt-10 text-center text-sm text-gray-400">
             조건에 맞는 식당이 없습니다.
@@ -143,7 +143,7 @@ export function RestaurantSidebar({
   )
 
   return (
-    <aside className="flex h-[45vh] w-full flex-col border-t border-gray-100 bg-gray-50 md:h-full md:w-[34%] md:max-w-sm md:border-r md:border-t-0">
+    <aside className="flex h-[45vh] w-full min-h-0 flex-col border-t border-gray-100 bg-gray-50 md:h-full md:w-[380px] md:shrink-0 md:border-r md:border-t-0">
       {body}
     </aside>
   )

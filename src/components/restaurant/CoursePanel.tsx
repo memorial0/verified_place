@@ -76,7 +76,7 @@ export function CoursePanel({
         </p>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {items.length === 0 ? (
           <p className="mt-10 text-center text-sm leading-relaxed text-gray-400">
             코스가 비어 있습니다.

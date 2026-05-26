@@ -152,7 +152,7 @@ export function MapExplorer() {
         />
       </div>
 
-      <div className="flex flex-1 flex-col-reverse overflow-hidden md:flex-row">
+      <div className="flex min-h-0 flex-1 flex-col-reverse overflow-hidden md:flex-row">
         <RestaurantSidebar
           restaurants={restaurants}
           activeId={activeId}
@@ -181,11 +181,11 @@ export function MapExplorer() {
           onToggleSave={toggleSave}
           onDirections={requestDirections}
         />
-        <div className="relative flex-1">
+        <div className="relative min-h-0 flex-1">
           <RestaurantMap
             restaurants={restaurants}
             activeId={activeId}
-            selectedId={selectedId}
+            selectedId={previewId ?? selectedId}
             previewId={previewId}
             route={route}
             onPreview={handlePreview}
