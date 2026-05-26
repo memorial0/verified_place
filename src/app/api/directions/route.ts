@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// 카카오 Mobility 길찾기는 REST 키(서버 시크릿)로 호출 → Edge 런타임
+// 네이버 Directions 5 는 NCP API Gateway 키(서버 시크릿)로 호출 → Edge 런타임
 export const runtime = 'edge'
 
 /**
  * GET /api/directions?origin=lng,lat&destination=lng,lat
- * 카카오모빌리티 자동차 길찾기 → 경로 좌표(path) + 요약(거리/시간/택시요금) 반환.
+ * 네이버 Directions 5 자동차 길찾기 → 경로 좌표(path) + 요약(거리/시간/택시요금) 반환.
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -15,45 +15,52 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'origin/destination 필요' }, { status: 400 })
   }
 
-  const key = process.env.KAKAO_REST_KEY
-  if (!key) {
-    return NextResponse.json({ error: 'KAKAO_REST_KEY 미설정' }, { status: 500 })
+  // JS SDK 와 동일한 NCP Maps 애플리케이션 자격증명 (Client ID + Secret)
+  const keyId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID
+  const keySecret = process.env.NAVER_CLIENT_SECRET
+  if (!keyId || !keySecret) {
+    return NextResponse.json({ error: '네이버 지도 키 미설정' }, { status: 500 })
   }
 
-  const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${encodeURIComponent(
-    origin,
-  )}&destination=${encodeURIComponent(destination)}`
+  // start/goal 모두 "경도,위도(lng,lat)" 포맷. option=traoptimal: 실시간 최적 경로
+  const url =
+    'https://naveropenapi.apigw.ntruss.com/map-direction/v1/driving' +
+    `?start=${encodeURIComponent(origin)}&goal=${encodeURIComponent(destination)}&option=traoptimal`
 
-  const res = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` } })
+  const res = await fetch(url, {
+    headers: {
+      'x-ncp-apigw-api-key-id': keyId,
+      'x-ncp-apigw-api-key': keySecret,
+    },
+  })
   if (!res.ok) {
-    return NextResponse.json({ error: `kakao ${res.status}` }, { status: 502 })
+    return NextResponse.json({ error: `naver ${res.status}` }, { status: 502 })
   }
 
   const data = await res.json()
-  const route = data.routes?.[0]
-  if (!route || route.result_code !== 0) {
+  // code 0 = 성공. 그 외엔 message 에 사유(경로 없음, 출도착 동일 등)
+  if (data.code !== 0) {
     return NextResponse.json(
-      { error: route?.result_msg ?? '경로를 찾지 못했습니다' },
+      { error: data.message ?? '경로를 찾지 못했습니다' },
       { status: 422 },
     )
   }
 
-  // sections[].roads[].vertexes(평면 [lng,lat,...]) → {lat,lng}[]
-  const path: { lat: number; lng: number }[] = []
-  for (const section of route.sections ?? []) {
-    for (const road of section.roads ?? []) {
-      const v: number[] = road.vertexes ?? []
-      for (let i = 0; i + 1 < v.length; i += 2) {
-        path.push({ lng: v[i], lat: v[i + 1] })
-      }
-    }
+  const route = data.route?.traoptimal?.[0]
+  if (!route) {
+    return NextResponse.json({ error: '경로를 찾지 못했습니다' }, { status: 422 })
   }
+
+  // path: [[lng,lat], ...] → {lat,lng}[]
+  const path: { lat: number; lng: number }[] = (route.path ?? []).map(
+    ([lng, lat]: [number, number]) => ({ lat, lng }),
+  )
 
   return NextResponse.json({
     summary: {
       distance: route.summary.distance, // m
-      duration: route.summary.duration, // s
-      taxiFare: route.summary.fare?.taxi,
+      duration: Math.round(route.summary.duration / 1000), // 네이버는 ms → s 로 변환
+      taxiFare: route.summary.taxiFare,
     },
     path,
   })

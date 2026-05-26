@@ -35,11 +35,10 @@ export function RestaurantDetail({
   const primary = primaryVerification(restaurant)
   const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
 
-  // 길찾기 URL — 좌표가 있으면 좌표 기반 도착지 딥링크(정확), 없거나 0이면 검색 URL로 fallback
-  const hasCoords = Boolean(restaurant.lat && restaurant.lng)
-  const kakaoMapUrl = hasCoords
-    ? `https://map.kakao.com/link/to/${encodeURIComponent(restaurant.name)},${restaurant.lat},${restaurant.lng}`
-    : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name || restaurant.addressRoad)}`
+  // 네이버 지도 외부 링크 — 이름(없으면 주소)으로 검색해 해당 장소를 띄운다
+  const naverMapUrl = `https://map.naver.com/p/search/${encodeURIComponent(
+    restaurant.name || restaurant.addressRoad,
+  )}`
 
   return (
     <div className="flex h-full flex-col">
@@ -166,14 +165,14 @@ export function RestaurantDetail({
           </button>
         </div>
 
-        {/* 대중교통·도보는 카카오맵으로 (자동차 외 경로) */}
+        {/* 대중교통·도보는 네이버 지도로 (자동차 외 경로) */}
         <a
-          href={kakaoMapUrl}
+          href={naverMapUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-2 block text-center text-xs text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline"
         >
-          대중교통·도보는 카카오맵에서 열기 →
+          대중교통·도보는 네이버 지도에서 열기 →
         </a>
       </div>
     </div>
