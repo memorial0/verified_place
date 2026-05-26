@@ -8,6 +8,9 @@
 // =============================================================================
 import michelinGeo from './michelin-seoul.geocoded.json'
 import blueRibbonGeo from './blue-ribbon.geocoded.json'
+import goodPriceCc from './good-price-chuncheon.geocoded.json'
+import centennialCc from './centennial-chuncheon.geocoded.json'
+import blueRibbonCc from './blue-ribbon-chuncheon.geocoded.json'
 import {
   RESTAURANTS as DEMO,
   type Restaurant,
@@ -125,6 +128,82 @@ for (const g of blueRibbonGeo as BlueRibbonRow[]) {
 
 export const BLUE_RIBBON_RESTAURANTS: Restaurant[] = BLUE_RIBBON_ONLY
 
+// ── 춘천 소스(착한가격업소·백년가게·블루리본) 통합 ─────────────────────────────
+// 한 식당이 여러 소스에 등장 가능 → 거리(60m)+이름 기준 병합 → 행 1개 + 인증 여러 개.
+// (scripts/gen-seed-chuncheon.mjs 와 동일 로직 — 변경 시 함께 유지)
+interface ChuncheonRow {
+  source: VerificationCode
+  nameKo: string
+  ribbons?: number
+  year: number
+  sido: string
+  sigungu: string
+  addressRoad: string
+  category: string
+  phone?: string
+  lat: number
+  lng: number
+  externalId: string
+}
+
+const CC_PRIORITY: Record<string, number> = { blue_ribbon: 3, centennial: 2, good_price: 1 }
+
+function distM(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371000
+  const toRad = (d: number) => (d * Math.PI) / 180
+  const dLat = toRad(b.lat - a.lat)
+  const dLng = toRad(b.lng - a.lng)
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+const nameMatch = (a: string, b: string) => {
+  const x = normalizeName(a)
+  const y = normalizeName(b)
+  return x.includes(y) || y.includes(x)
+}
+
+const CHUNCHEON_RESTAURANTS: Restaurant[] = (() => {
+  const records = [
+    ...(blueRibbonCc as ChuncheonRow[]),
+    ...(centennialCc as ChuncheonRow[]),
+    ...(goodPriceCc as ChuncheonRow[]),
+  ]
+  const venues: ChuncheonRow[][] = []
+  for (const rec of records) {
+    const v = venues.find((g) =>
+      g.some((r) => distM(r, rec) < 60 && nameMatch(r.nameKo, rec.nameKo)),
+    )
+    if (v) v.push(rec)
+    else venues.push([rec])
+  }
+  return venues.map((recs) => {
+    const primary = [...recs].sort(
+      (a, b) => CC_PRIORITY[b.source] - CC_PRIORITY[a.source],
+    )[0]
+    const cuisine = cuisineOf(primary.category)
+    return {
+      id: `${primary.source}-${normalizeName(primary.nameKo)}`,
+      name: primary.nameKo,
+      category: cuisine,
+      keywords: [cuisine, primary.sigungu].filter(Boolean) as string[],
+      tagline: '',
+      reason: '',
+      addressRoad: primary.addressRoad,
+      lat: primary.lat,
+      lng: primary.lng,
+      sido: primary.sido,
+      sigungu: primary.sigungu,
+      verifications: recs.map((r) => ({
+        code: r.source,
+        rating: r.ribbons,
+        awardedYear: r.year,
+      })),
+    }
+  })
+})()
+
 // 미쉐린·블루리본 외 카테고리는 아직 실데이터가 없어 데모 항목 유지
 const DEMO_OTHER = DEMO.filter(
   (r) =>
@@ -136,5 +215,6 @@ const DEMO_OTHER = DEMO.filter(
 export const RESTAURANT_DATASET: Restaurant[] = [
   ...MICHELIN_RESTAURANTS,
   ...BLUE_RIBBON_ONLY,
+  ...CHUNCHEON_RESTAURANTS,
   ...DEMO_OTHER,
 ]

@@ -1,0 +1,1090 @@
+[
+  {
+    "source": "good_price",
+    "nameKo": "행복한두부",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "행복한두부",
+    "addressRoad": "강원특별자치도 춘천시 둥지길 4",
+    "category": "음식점 > 한식",
+    "phone": "033-255-7710",
+    "lat": 37.874746449194,
+    "lng": 127.735372273477,
+    "externalId": "good_price-춘천-행복한두부",
+    "metadata": {
+      "menu": "두부찌개"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "곱돌생삼겹살",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "곱돌생삼겹살",
+    "addressRoad": "강원특별자치도 춘천시 백령로138번길 55",
+    "category": "음식점 > 한식",
+    "phone": "033-255-4241",
+    "lat": 37.8731172068198,
+    "lng": 127.745471505129,
+    "externalId": "good_price-춘천-곱돌생삼겹살",
+    "metadata": {
+      "menu": "(캐나다산) 생삼겹살"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "뚝배기마을",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "뚝배기마을",
+    "addressRoad": "강원특별자치도 춘천시 옥천길 3",
+    "category": "음식점 > 한식",
+    "phone": "033-251-3938",
+    "lat": 37.8806991179296,
+    "lng": 127.728613035291,
+    "externalId": "good_price-춘천-뚝배기마을",
+    "metadata": {
+      "menu": "순두부찌개"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "닭갈비짱",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "닭갈비짱",
+    "addressRoad": "강원특별자치도 춘천시 스무숲1길 38-9",
+    "category": "음식점 > 한식",
+    "phone": "033-261-3688",
+    "lat": 37.8492683443013,
+    "lng": 127.750878159251,
+    "externalId": "good_price-춘천-닭갈비짱",
+    "metadata": {
+      "menu": "특선도시락"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "봉실스넥",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "봉실스넥",
+    "addressRoad": "강원특별자치도 춘천시 서부대성로239번길 8",
+    "category": "음식점 > 한식",
+    "phone": "033-251-6890",
+    "lat": 37.8732547890045,
+    "lng": 127.745099874572,
+    "externalId": "good_price-춘천-봉실스넥",
+    "metadata": {
+      "menu": "순두부찌개"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "촌닭곰탕",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "촌닭곰탕",
+    "addressRoad": "강원특별자치도 춘천시 동내면 영서로 1776",
+    "category": "음식점 > 한식",
+    "phone": "0507-1409-9631",
+    "lat": 37.8352490069807,
+    "lng": 127.760689284864,
+    "externalId": "good_price-춘천-촌닭곰탕",
+    "metadata": {
+      "menu": "닭곰탕"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "낭만국시",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "낭만국시",
+    "addressRoad": "강원특별자치도 춘천시 명동길29번길 3",
+    "category": "음식점 > 한식",
+    "phone": "033-252-6255",
+    "lat": 37.8781171202343,
+    "lng": 127.725962552609,
+    "externalId": "good_price-춘천-낭만국시",
+    "metadata": {
+      "menu": "칼국시"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "해미담",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "해미담",
+    "addressRoad": "강원특별자치도 춘천시 효자로24번길 12",
+    "category": "음식점 > 한식",
+    "phone": "033-241-7376",
+    "lat": 37.8659593286983,
+    "lng": 127.728164896717,
+    "externalId": "good_price-춘천-해미담",
+    "metadata": {
+      "menu": "제주흑돼지 오겹살(180g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "광치해장국",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "광치해장국",
+    "addressRoad": "강원특별자치도 춘천시 영서로 2676",
+    "category": "음식점 > 한식",
+    "phone": "033-253-1100",
+    "lat": 37.8932252439588,
+    "lng": 127.726036660624,
+    "externalId": "good_price-춘천-광치해장국",
+    "metadata": {
+      "menu": "선지해장국"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "왕가",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "왕가",
+    "addressRoad": "강원특별자치도 춘천시 석사길 15",
+    "category": "음식점 > 한식",
+    "phone": "033-261-0559",
+    "lat": 37.8579328322032,
+    "lng": 127.744971856148,
+    "externalId": "good_price-춘천-왕가",
+    "metadata": {
+      "menu": "한식뷔페"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "춘천뒷고기",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "춘천뒷고기",
+    "addressRoad": "강원특별자치도 춘천시 우묵길 52",
+    "category": "음식점 > 한식",
+    "phone": "033-251-0430",
+    "lat": 37.8656528709527,
+    "lng": 127.722396160676,
+    "externalId": "good_price-춘천-춘천뒷고기",
+    "metadata": {
+      "menu": "뒷고기(180g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "천하일미닭갈비",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "천하일미닭갈비",
+    "addressRoad": "강원특별자치도 춘천시 영서로2279번길 25",
+    "category": "음식점 > 한식",
+    "phone": "033-253-2538",
+    "lat": 37.8628068929099,
+    "lng": 127.720326390422,
+    "externalId": "good_price-춘천-천하일미닭갈비",
+    "metadata": {
+      "menu": "닭갈비"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "화롯불",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "화롯불",
+    "addressRoad": "강원특별자치도 춘천시 충열로 166",
+    "category": "음식점 > 한식",
+    "phone": "033-243-9289",
+    "lat": 37.907454587231,
+    "lng": 127.73985031469,
+    "externalId": "good_price-춘천-화롯불",
+    "metadata": {
+      "menu": "돼지갈비(300g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "약사촌 닭갈비",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "약사촌 닭갈비",
+    "addressRoad": "강원특별자치도 춘천시 공지로 384-9",
+    "category": "음식점 > 한식",
+    "phone": "033-256-9255",
+    "lat": 37.8719511821893,
+    "lng": 127.724553429217,
+    "externalId": "good_price-춘천-약사촌닭갈비",
+    "metadata": {
+      "menu": "닭갈비"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "만리향",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "만리향",
+    "addressRoad": "강원특별자치도 춘천시 명동길29번길 4-5",
+    "category": "음식점 > 중식",
+    "phone": "033-251-2227",
+    "lat": 37.8779879948066,
+    "lng": 127.725893087544,
+    "externalId": "good_price-춘천-만리향",
+    "metadata": {
+      "menu": "짜장면"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "우리순대국",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "우리순대국",
+    "addressRoad": "강원특별자치도 춘천시 후석로45번길 15",
+    "category": "음식점 > 한식",
+    "phone": "033-252-9545",
+    "lat": 37.8593067249022,
+    "lng": 127.740549073063,
+    "externalId": "good_price-춘천-우리순대국",
+    "metadata": {
+      "menu": "순대국"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "황토집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "황토집",
+    "addressRoad": "강원특별자치도 춘천시 벌말길 54-1",
+    "category": "음식점 > 한식",
+    "phone": "033-257-7792",
+    "lat": 37.859382765949,
+    "lng": 127.742351389083,
+    "externalId": "good_price-춘천-황토집",
+    "metadata": {
+      "menu": "돌솥정식"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "백령밥집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "백령밥집",
+    "addressRoad": "강원특별자치도 춘천시 백령로 182",
+    "category": "음식점 > 한식",
+    "phone": "1층(후평동)",
+    "lat": 37.8763300771162,
+    "lng": 127.746484998535,
+    "externalId": "good_price-춘천-백령밥집",
+    "metadata": {
+      "menu": "가정식백반"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "감돈",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "감돈",
+    "addressRoad": "강원특별자치도 춘천시 동내면 거두택지길4번길 7-13",
+    "category": "음식점 > 한식",
+    "phone": "033-264-9293",
+    "lat": 37.8525580879821,
+    "lng": 127.752897892208,
+    "externalId": "good_price-춘천-감돈",
+    "metadata": {
+      "menu": "삼겹살(180g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "유봉해물찜",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "유봉해물찜",
+    "addressRoad": "강원특별자치도 춘천시 퇴계로 63-1",
+    "category": "음식점 > 한식",
+    "phone": "033-243-3323",
+    "lat": 37.8638340743252,
+    "lng": 127.72825967046,
+    "externalId": "good_price-춘천-유봉해물찜",
+    "metadata": {
+      "menu": "아구찜(소)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "양지뜨락",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "양지뜨락",
+    "addressRoad": "강원특별자치도 춘천시 동면 만천양지길 114",
+    "category": "음식점 > 한식",
+    "phone": "033-244-6690",
+    "lat": 37.8876696194505,
+    "lng": 127.766517242331,
+    "externalId": "good_price-춘천-양지뜨락",
+    "metadata": {
+      "menu": "손두부전골"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "강남동 골목원조닭갈비",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "강남동 골목원조닭갈비",
+    "addressRoad": "강원특별자치도 춘천시 충혼길52번길 20-4",
+    "category": "음식점 > 한식",
+    "phone": "033-251-5909",
+    "lat": 37.860823829298,
+    "lng": 127.718634133002,
+    "externalId": "good_price-춘천-강남동골목원조닭갈비",
+    "metadata": {
+      "menu": "닭갈비(300g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "동부지짐이다정",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "동부지짐이다정",
+    "addressRoad": "강원특별자치도 춘천시 동부시장길 8",
+    "category": "음식점 > 한식",
+    "phone": "지하1층 3호 (운교동",
+    "lat": 37.877292655512,
+    "lng": 127.734087864142,
+    "externalId": "good_price-춘천-동부지짐이다정",
+    "metadata": {
+      "menu": "삼겹살(200g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "밥짓는마을",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "밥짓는마을",
+    "addressRoad": "강원특별자치도 춘천시 중앙로 63-1",
+    "category": "음식점 > 한식",
+    "phone": "2층 (중앙로2가)",
+    "lat": 37.8793858304165,
+    "lng": 127.726806123679,
+    "externalId": "good_price-춘천-밥짓는마을",
+    "metadata": {
+      "menu": "한식뷔페"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "롯데자율식당",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "롯데자율식당",
+    "addressRoad": "강원특별자치도 춘천시 공지로 387",
+    "category": "음식점 > 한식",
+    "phone": "지하층(약사동)",
+    "lat": 37.8716410438521,
+    "lng": 127.723885862381,
+    "externalId": "good_price-춘천-롯데자율식당",
+    "metadata": {
+      "menu": "한식뷔페"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "아무거나",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "아무거나",
+    "addressRoad": "강원특별자치도 춘천시 벌말길 64",
+    "category": "음식점 > 한식",
+    "phone": "033-262-6827",
+    "lat": 37.8600082400058,
+    "lng": 127.742972428393,
+    "externalId": "good_price-춘천-아무거나",
+    "metadata": {
+      "menu": "김치찌개(2인분)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "짱구네 숯불닭발",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "짱구네 숯불닭발",
+    "addressRoad": "강원특별자치도 춘천시 소양로 184",
+    "category": "음식점 > 한식",
+    "phone": "1층",
+    "lat": 37.8895298622497,
+    "lng": 127.725269289946,
+    "externalId": "good_price-춘천-짱구네숯불닭발",
+    "metadata": {
+      "menu": "닭발"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "불발탄",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "불발탄",
+    "addressRoad": "강원특별자치도 춘천시 안마산로 213",
+    "category": "음식점 > 한식",
+    "phone": "033-263-9293",
+    "lat": 37.8500059095325,
+    "lng": 127.737669282743,
+    "externalId": "good_price-춘천-불발탄",
+    "metadata": {
+      "menu": "양구이(200g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "분식집에 하숙하는 붕어빵",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "분식집에 하숙하는 붕어빵",
+    "addressRoad": "강원특별자치도 춘천시 삭주로 25",
+    "category": "음식점 > 한식",
+    "phone": "1층(교동)",
+    "lat": 37.8814516665853,
+    "lng": 127.734570973464,
+    "externalId": "good_price-춘천-분식집에하숙하는붕어빵",
+    "metadata": {
+      "menu": "떡볶이"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "바탕골분식",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "바탕골분식",
+    "addressRoad": "강원특별자치도 춘천시 서부대성로44번길 19",
+    "category": "음식점 > 한식",
+    "phone": "033-254-3564",
+    "lat": 37.88168933514,
+    "lng": 127.727315490081,
+    "externalId": "good_price-춘천-바탕골분식",
+    "metadata": {
+      "menu": "김치찌개"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "호반식당",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "호반식당",
+    "addressRoad": "강원특별자치도 춘천시 당간지주길 81",
+    "category": "음식점 > 한식",
+    "phone": "033-256-0848",
+    "lat": 37.8925147393794,
+    "lng": 127.724462760323,
+    "externalId": "good_price-춘천-호반식당",
+    "metadata": {
+      "menu": "김치찌개"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "심가당",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "심가당",
+    "addressRoad": "강원특별자치도 춘천시 춘천로 216",
+    "category": "음식점 > 한식",
+    "phone": "0507-1325-7419",
+    "lat": 37.877425561132,
+    "lng": 127.738004379726,
+    "externalId": "good_price-춘천-심가당",
+    "metadata": {
+      "menu": "어묵통김밥"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "소양댐 숯불 닭갈비",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "소양댐 숯불 닭갈비",
+    "addressRoad": "강원특별자치도 춘천시 신북읍 신샘밭로 687",
+    "category": "음식점 > 한식",
+    "phone": "0507-1403-5241",
+    "lat": 37.930283937762,
+    "lng": 127.785937169443,
+    "externalId": "good_price-춘천-소양댐숯불닭갈비",
+    "metadata": {
+      "menu": "소금닭갈비 (360g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "삼남매",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "삼남매",
+    "addressRoad": "강원특별자치도 춘천시 춘천로170번길 8",
+    "category": "음식점 > 한식",
+    "phone": "1층 (운교동)",
+    "lat": 37.8756946677783,
+    "lng": 127.73332299084,
+    "externalId": "good_price-춘천-삼남매",
+    "metadata": {
+      "menu": "가정식백반"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "팔도숯불구이",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "팔도숯불구이",
+    "addressRoad": "강원특별자치도 춘천시 춘주로92번길 9-3",
+    "category": "음식점 > 한식",
+    "phone": "033-242-5885",
+    "lat": 37.8611546164251,
+    "lng": 127.719731441747,
+    "externalId": "good_price-춘천-팔도숯불구이",
+    "metadata": {
+      "menu": "생삼겹(200g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "안가네밥집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "안가네밥집",
+    "addressRoad": "강원특별자치도 춘천시 남춘로25번길 4-1",
+    "category": "음식점 > 한식",
+    "phone": "1층 (퇴계동)",
+    "lat": 37.863683071761,
+    "lng": 127.730587479698,
+    "externalId": "good_price-춘천-안가네밥집",
+    "metadata": {
+      "menu": "두부전골"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "국수닭",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "국수닭",
+    "addressRoad": "강원특별자치도 춘천시 남춘로36번길 48",
+    "category": "음식점 > 한식",
+    "phone": "033-262-6399",
+    "lat": 37.8615806593812,
+    "lng": 127.735535866785,
+    "externalId": "good_price-춘천-국수닭",
+    "metadata": {
+      "menu": "닭국수"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "함지박",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "함지박",
+    "addressRoad": "강원특별자치도 춘천시 만천로199번길 30",
+    "category": "음식점 > 한식",
+    "phone": "0507-1409-1195",
+    "lat": 37.8857487497596,
+    "lng": 127.751892087418,
+    "externalId": "good_price-춘천-함지박",
+    "metadata": {
+      "menu": "그냥주물럭"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "하마집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "하마집",
+    "addressRoad": "강원특별자치도 춘천시 후석로369번길 2",
+    "category": "음식점 > 한식",
+    "phone": "033-257-4233",
+    "lat": 37.8835519270005,
+    "lng": 127.747393151027,
+    "externalId": "good_price-춘천-하마집",
+    "metadata": {
+      "menu": "가정식백반"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "한우야",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "한우야",
+    "addressRoad": "강원특별자치도 춘천시 안마산로 213",
+    "category": "음식점 > 한식",
+    "phone": "033-261-9222",
+    "lat": 37.8500059095325,
+    "lng": 127.737669282743,
+    "externalId": "good_price-춘천-한우야",
+    "metadata": {
+      "menu": "한우불고기"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "낭만국수집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "낭만국수집",
+    "addressRoad": "강원특별자치도 춘천시 서부대성로57번길 2",
+    "category": "음식점 > 한식",
+    "phone": "033-251-5688",
+    "lat": 37.8829699924835,
+    "lng": 127.72960354019,
+    "externalId": "good_price-춘천-낭만국수집",
+    "metadata": {
+      "menu": "돌솥비빔밥"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "옛촌",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "옛촌",
+    "addressRoad": "강원특별자치도 춘천시 향교앞길 4",
+    "category": "음식점 > 한식",
+    "phone": "1층(교동)",
+    "lat": 37.8810059576535,
+    "lng": 127.734270783857,
+    "externalId": "good_price-춘천-옛촌",
+    "metadata": {
+      "menu": "백반"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "와송칼국수",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "와송칼국수",
+    "addressRoad": "강원특별자치도 춘천시 명동길 46-1",
+    "category": "음식점 > 한식",
+    "phone": "033-255-7600",
+    "lat": 37.8772319253533,
+    "lng": 127.724402610449,
+    "externalId": "good_price-춘천-와송칼국수",
+    "metadata": {
+      "menu": "칼국수"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "골목손두부",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "골목손두부",
+    "addressRoad": "강원특별자치도 춘천시 공지로439번길 16-4",
+    "category": "음식점 > 한식",
+    "phone": "033-256-6259",
+    "lat": 37.8726486894719,
+    "lng": 127.719572641824,
+    "externalId": "good_price-춘천-골목손두부",
+    "metadata": {
+      "menu": "두부전골"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "만나돈가스",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "만나돈가스",
+    "addressRoad": "강원특별자치도 춘천시 백령로 29",
+    "category": "음식점 > 일식",
+    "phone": "033-241-8254",
+    "lat": 37.8667725263278,
+    "lng": 127.737900841549,
+    "externalId": "good_price-춘천-만나돈가스",
+    "metadata": {
+      "menu": "돈가스"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "봉수닭갈비",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "봉수닭갈비",
+    "addressRoad": "강원특별자치도 춘천시 서부대성로227번길 3-1",
+    "category": "음식점 > 한식",
+    "phone": "1층",
+    "lat": 37.8735338500721,
+    "lng": 127.743539804049,
+    "externalId": "good_price-춘천-봉수닭갈비",
+    "metadata": {
+      "menu": "닭갈비"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "장군닭갈비",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "장군닭갈비",
+    "addressRoad": "강원특별자치도 춘천시 춘주로147번길 12-6",
+    "category": "음식점 > 한식 > 육류,고기 > 닭요리",
+    "phone": "033-241-8342",
+    "lat": 37.8593328703226,
+    "lng": 127.725627247341,
+    "externalId": "good_price-춘천-장군닭갈비",
+    "metadata": {
+      "menu": "닭갈비"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "홍두깨장칼국수",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "홍두깨장칼국수",
+    "addressRoad": "강원특별자치도 춘천시 춘주로147번길 12-4",
+    "category": "음식점 > 한식",
+    "phone": "033-255-5954",
+    "lat": 37.859415049839,
+    "lng": 127.725464078791,
+    "externalId": "good_price-춘천-홍두깨장칼국수",
+    "metadata": {
+      "menu": "장칼국수"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "밥보네집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "밥보네집",
+    "addressRoad": "강원특별자치도 춘천시 서부대성로239번길 4",
+    "category": "음식점 > 한식",
+    "phone": "033-255-2123",
+    "lat": 37.8730237470997,
+    "lng": 127.744950136894,
+    "externalId": "good_price-춘천-밥보네집",
+    "metadata": {
+      "menu": "제육볶음정식"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "금옥",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "금옥",
+    "addressRoad": "강원특별자치도 춘천시 동면 금옥길 289-27",
+    "category": "음식점 > 한식",
+    "phone": "033-241-1791",
+    "lat": 37.9229090212663,
+    "lng": 127.80680948061,
+    "externalId": "good_price-춘천-금옥",
+    "metadata": {
+      "menu": "막국수"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "돼학로",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "돼학로",
+    "addressRoad": "강원특별자치도 춘천시 향교옆길 24",
+    "category": "음식점 > 한식",
+    "phone": "1층",
+    "lat": 37.882615348649,
+    "lng": 127.73592019917,
+    "externalId": "good_price-춘천-돼학로",
+    "metadata": {
+      "menu": "한돈 생삼겹살"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "임가네",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "임가네",
+    "addressRoad": "강원특별자치도 춘천시 새롬공원길 25",
+    "category": "음식점 > 한식",
+    "phone": "033-262-5245",
+    "lat": 37.8544088335552,
+    "lng": 127.747076544582,
+    "externalId": "good_price-춘천-임가네",
+    "metadata": {
+      "menu": "소고기뭇국"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "우두동밥집",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "우두동밥집",
+    "addressRoad": "강원특별자치도 춘천시 충열로 151",
+    "category": "음식점 > 한식",
+    "phone": "033-255-5999",
+    "lat": 37.9064353158928,
+    "lng": 127.739443272825,
+    "externalId": "good_price-춘천-우두동밥집",
+    "metadata": {
+      "menu": "한식뷔페"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "길성식당",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "길성식당",
+    "addressRoad": "강원특별자치도 춘천시 명동길29번길 8-7",
+    "category": "음식점 > 한식",
+    "phone": "033-254-2411",
+    "lat": 37.8777548564263,
+    "lng": 127.725991731724,
+    "externalId": "good_price-춘천-길성식당",
+    "metadata": {
+      "menu": "순대국밥"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "더밥",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "더밥",
+    "addressRoad": "강원특별자치도 춘천시 춘주로91번길 10",
+    "category": "음식점 > 한식",
+    "phone": "033-242-2178",
+    "lat": 37.862555029709,
+    "lng": 127.720541103243,
+    "externalId": "good_price-춘천-더밥",
+    "metadata": {
+      "menu": "제육덮밥"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "수제돈가스",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "수제돈가스",
+    "addressRoad": "강원특별자치도 춘천시 명동길 43",
+    "category": "음식점 > 한식",
+    "phone": "1층",
+    "lat": 37.8773260893336,
+    "lng": 127.72485363333,
+    "externalId": "good_price-춘천-수제돈가스",
+    "metadata": {
+      "menu": "돈가스정식"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "하나축산 정육식당",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "하나축산 정육식당",
+    "addressRoad": "강원특별자치도 춘천시 우묵길56번길 12",
+    "category": "음식점 > 한식",
+    "phone": "033-257-4534",
+    "lat": 37.8653483519663,
+    "lng": 127.723159939753,
+    "externalId": "good_price-춘천-하나축산정육식당",
+    "metadata": {
+      "menu": "생오겹살 (국내산 200g)"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "오믈하우스",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "오믈하우스",
+    "addressRoad": "강원특별자치도 춘천시 서부대성로227번길 24",
+    "category": "음식점 > 한식",
+    "phone": "2층",
+    "lat": 37.8733761570024,
+    "lng": 127.745183270006,
+    "externalId": "good_price-춘천-오믈하우스",
+    "metadata": {
+      "menu": "오므라이스"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "원식이네손칼국수",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "원식이네손칼국수",
+    "addressRoad": "강원특별자치도 춘천시 후석로 591",
+    "category": "음식점 > 한식",
+    "phone": "033-257-5652",
+    "lat": 37.8935567713935,
+    "lng": 127.727949853704,
+    "externalId": "good_price-춘천-원식이네손칼국수",
+    "metadata": {
+      "menu": "해물칼국수"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "이서냉면",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "이서냉면",
+    "addressRoad": "강원특별자치도 춘천시 우석로 14-1",
+    "category": "음식점 > 한식",
+    "phone": "0507-1487-4040",
+    "lat": 37.8619369731876,
+    "lng": 127.747666290632,
+    "externalId": "good_price-춘천-이서냉면",
+    "metadata": {
+      "menu": "냉면"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "박사로냉면",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "박사로냉면",
+    "addressRoad": "강원특별자치도 춘천시 서면 박사로 839",
+    "category": "음식점 > 한식",
+    "phone": "0507-1399-2411",
+    "lat": 37.8919532072736,
+    "lng": 127.689617088095,
+    "externalId": "good_price-춘천-박사로냉면",
+    "metadata": {
+      "menu": "냉면"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "진미감자탕순대국",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "진미감자탕순대국",
+    "addressRoad": "강원특별자치도 춘천시 칠전서길 46-19",
+    "category": "음식점 > 한식",
+    "phone": "0507-1350-5726",
+    "lat": 37.8434346820801,
+    "lng": 127.71311104043,
+    "externalId": "good_price-춘천-진미감자탕순대국",
+    "metadata": {
+      "menu": "순대국밥"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "거두리 가보자 토종순대국",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "거두리 가보자 토종순대국",
+    "addressRoad": "강원특별자치도 춘천시 동내면 춘천순환로94번길 25",
+    "category": "음식점 > 한식",
+    "phone": "033-261-0877",
+    "lat": 37.8541051990574,
+    "lng": 127.755663942476,
+    "externalId": "good_price-춘천-거두리가보자토종순대국",
+    "metadata": {
+      "menu": "순대국밥"
+    }
+  },
+  {
+    "source": "good_price",
+    "nameKo": "화동손칼국수",
+    "year": 2025,
+    "sido": "강원특별자치도",
+    "sigungu": "춘천시",
+    "placeName": "화동손칼국수",
+    "addressRoad": "강원특별자치도 춘천시 춘천로 205-1",
+    "category": "음식점 > 한식",
+    "phone": "033-251-4819",
+    "lat": 37.8774005990492,
+    "lng": 127.736768399399,
+    "externalId": "good_price-춘천-화동손칼국수",
+    "metadata": {
+      "menu": "장칼국수"
+    }
+  }
+]

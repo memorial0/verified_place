@@ -5,7 +5,12 @@
 // =============================================================================
 
 /** DDL의 verification_types.code 와 동일한 코드 체계 */
-export type VerificationCode = 'michelin' | 'blue_ribbon' | 'centennial' | 'celebrity'
+export type VerificationCode =
+  | 'michelin'
+  | 'blue_ribbon'
+  | 'centennial'
+  | 'good_price'
+  | 'celebrity'
 
 export interface Verification {
   code: VerificationCode
@@ -29,6 +34,10 @@ export interface Restaurant {
   addressRoad: string
   lat: number
   lng: number
+  /** 시도 (예: '강원특별자치도') — 지역 검색/확장용, UI 필터는 아직 없음 */
+  sido?: string
+  /** 시군구 (예: '춘천시') */
+  sigungu?: string
   verifications: Verification[]
 }
 
@@ -40,6 +49,7 @@ export const VERIFICATION_META: Record<
   michelin: { label: '미슐랭', emoji: '⭐', color: '#C4002B' },
   blue_ribbon: { label: '블루리본', emoji: '🎀', color: '#1E40AF' },
   centennial: { label: '백년가게', emoji: '🏅', color: '#047857' },
+  good_price: { label: '착한가격업소', emoji: '💰', color: '#EA580C' },
   celebrity: { label: '연예인 픽', emoji: '📺', color: '#7C3AED' },
 }
 
@@ -48,6 +58,7 @@ export const VERIFICATION_PRIORITY: VerificationCode[] = [
   'michelin',
   'blue_ribbon',
   'centennial',
+  'good_price',
   'celebrity',
 ]
 
@@ -66,6 +77,7 @@ export const FILTER_OPTIONS: { value: FilterValue; label: string; color: string 
   { value: 'michelin', label: '미슐랭', color: VERIFICATION_META.michelin.color },
   { value: 'blue_ribbon', label: '블루리본', color: VERIFICATION_META.blue_ribbon.color },
   { value: 'centennial', label: '백년가게', color: VERIFICATION_META.centennial.color },
+  { value: 'good_price', label: '착한가격', color: VERIFICATION_META.good_price.color },
   { value: 'celebrity', label: '연예인 픽', color: VERIFICATION_META.celebrity.color },
 ]
 

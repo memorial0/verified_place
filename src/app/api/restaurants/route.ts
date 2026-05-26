@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     .from('restaurants')
     .select(
       `id, name, branch_name, address_road, address_jibun,
-       latitude, longitude, phone, status,
+       latitude, longitude, sido, sigungu, phone, status,
        keywords, tagline, reason_to_visit,
        category:categories(slug, name_ko),
        verifications:restaurant_verifications(

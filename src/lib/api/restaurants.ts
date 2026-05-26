@@ -21,6 +21,8 @@ interface ApiRestaurant {
   address_jibun: string | null
   latitude: number | null
   longitude: number | null
+  sido: string | null
+  sigungu: string | null
   keywords: string[] | null
   tagline: string | null
   reason_to_visit: string | null
@@ -40,6 +42,8 @@ export function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     addressRoad: r.address_road ?? r.address_jibun ?? '',
     lat: r.latitude ?? 0,
     lng: r.longitude ?? 0,
+    sido: r.sido ?? undefined,
+    sigungu: r.sigungu ?? undefined,
     verifications: (r.verifications ?? [])
       .filter((v) => v.type?.code)
       .map((v) => ({
