@@ -47,7 +47,7 @@ export function MapExplorer() {
     setRoute(null) // 다른 식당으로 이동하면 그려진 경로 제거
   }
 
-  // 현재 위치 → 식당 자동차 경로. 위치 거부/실패 시 카카오맵으로 폴백.
+  // 현재 위치 → 식당 자동차 경로. 위치 거부/실패 시 네이버 지도로 폴백.
   const requestDirections = async (r: Restaurant) => {
     setDirLoading(true)
     try {
@@ -56,7 +56,7 @@ export function MapExplorer() {
       setRoute({ destId: r.id, origin, path, summary })
     } catch {
       window.open(
-        `https://map.kakao.com/link/to/${encodeURIComponent(r.name)},${r.lat},${r.lng}`,
+        `https://map.naver.com/p/search/${encodeURIComponent(r.name)}`,
         '_blank',
         'noopener',
       )
