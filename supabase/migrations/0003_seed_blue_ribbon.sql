@@ -4,7 +4,6 @@
 -- 좌표/주소 출처: 카카오 Local 지오코딩 (src/lib/data/blue-ribbon.geocoded.json)
 -- ⚠️ 인증 연결은 restaurants.name 매칭 기준 — 동일 이름이 여러 행이면 모두 연결될 수 있음.
 
--- 미슐랭 행에 붙은 blue_ribbon 인증까지 제거(restaurants 삭제 cascade로는 안 지워짐)
 delete from public.restaurant_verifications
   where verification_type_id = (select id from public.verification_types where code = 'blue_ribbon');
 delete from public.restaurants where data_source = 'blue_ribbon';
@@ -14,7 +13,6 @@ insert into public.restaurants
 values
   ('강민철레스토랑', '서울 강남구 도산대로63길 18', 37.524965745307945, 127.04368184193406, (select id from public.categories where slug='western'), ARRAY['양식','강남구'], 'blue_ribbon', 'blue-ribbon-강민철레스토랑', 'published'),
   ('고료리켄', '서울 강남구 언주로152길 15-3', 37.52300901428518, 127.03480609700759, (select id from public.categories where slug='japanese'), ARRAY['일식','강남구'], 'blue_ribbon', 'blue-ribbon-고료리켄', 'published'),
-  ('낙원', '서울 종로구 삼일대로26길 20', 37.5733001868081, 126.989146348574, (select id from public.categories where slug='korean'), ARRAY['한식','종로구'], 'blue_ribbon', 'blue-ribbon-낙원', 'published'),
   ('다이닝마', '서울 강남구 언주로152길 8', 37.5224974023329, 127.034267391173, (select id from public.categories where slug='chinese'), ARRAY['중국요리','강남구'], 'blue_ribbon', 'blue-ribbon-다이닝마', 'published'),
   ('더그린테이블', '서울 종로구 율곡로 83', 37.57776183677381, 126.98835777941869, (select id from public.categories where slug='western'), ARRAY['양식','종로구'], 'blue_ribbon', 'blue-ribbon-더그린테이블', 'published'),
   ('도림', '서울 중구 을지로 30', 37.5653379542771, 126.980961724646, (select id from public.categories where slug='chinese'), ARRAY['중식','중구'], 'blue_ribbon', 'blue-ribbon-도림', 'published'),
@@ -39,7 +37,9 @@ values
   ('파씨오네', '서울 강남구 언주로164길 39', 37.525448340313, 127.036748507093, (select id from public.categories where slug='western'), ARRAY['양식','강남구'], 'blue_ribbon', 'blue-ribbon-파씨오네', 'published'),
   ('팔선', '서울 중구 동호로 249', 37.5559762162812, 127.005183376469, (select id from public.categories where slug='chinese'), ARRAY['중식','중구'], 'blue_ribbon', 'blue-ribbon-팔선', 'published'),
   ('홍보각', '서울 강남구 봉은사로 130', 37.5052752410458, 127.028919050438, (select id from public.categories where slug='chinese'), ARRAY['중식','강남구'], 'blue_ribbon', 'blue-ribbon-홍보각', 'published'),
-  ('한국의집', '서울 중구 소공동 20-7', 37.564404550241, 126.981136270021, (select id from public.categories where slug='korean'), ARRAY['한식','중구'], 'blue_ribbon', 'blue-ribbon-한국의집', 'published');
+  ('모수서울', '서울 용산구 회나무로41길 4', 37.5411971867086, 126.996181126207, (select id from public.categories where slug='western'), ARRAY['양식','용산구'], 'blue_ribbon', 'blue-ribbon-모수서울', 'published'),
+  ('하네', '서울 강남구 언주로172길 14', 37.5276365316183, 127.034907802556, (select id from public.categories where slug='japanese'), ARRAY['초밥,롤','강남구'], 'blue_ribbon', 'blue-ribbon-하네', 'published'),
+  ('호빈', '서울 중구 동호로 287', 37.5601452228938, 127.002248895826, (select id from public.categories where slug='chinese'), ARRAY['중국요리','중구'], 'blue_ribbon', 'blue-ribbon-호빈', 'published');
 
 insert into public.restaurant_verifications
   (restaurant_id, verification_type_id, rating, awarded_year, is_verified)
@@ -47,7 +47,6 @@ select r.id, vt.id, v.ribbons, v.year, true
 from (values
   ('강민철레스토랑', 3, 2026),
   ('고료리켄', 3, 2026),
-  ('낙원', 3, 2026),
   ('다이닝마', 3, 2026),
   ('더그린테이블', 3, 2026),
   ('도림', 3, 2026),
@@ -72,7 +71,14 @@ from (values
   ('파씨오네', 3, 2026),
   ('팔선', 3, 2026),
   ('홍보각', 3, 2026),
-  ('한국의집', 3, 2026)
+  ('밍글스', 3, 2026),
+  ('정식당', 3, 2026),
+  ('권숙수', 3, 2026),
+  ('미토우', 3, 2026),
+  ('알라 프리마', 3, 2026),
+  ('모수서울', 3, 2026),
+  ('하네', 3, 2026),
+  ('호빈', 3, 2026)
 ) as v(name, ribbons, year)
 join public.restaurants r on r.name = v.name
 join public.verification_types vt on vt.code = 'blue_ribbon';
