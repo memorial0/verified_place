@@ -185,7 +185,7 @@ export function MapExplorer() {
           <RestaurantMap
             restaurants={restaurants}
             activeId={activeId}
-            selectedId={previewId ?? selectedId}
+            selectedId={selectedId}
             previewId={previewId}
             route={route}
             onPreview={handlePreview}

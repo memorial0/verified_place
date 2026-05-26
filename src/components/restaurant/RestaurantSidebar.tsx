@@ -108,9 +108,9 @@ export function RestaurantSidebar({
             <button
               type="button"
               onClick={course.open}
-              className="ml-2 rounded-full px-1.5 py-0.5 font-bold text-emerald-600 transition-colors hover:bg-emerald-50"
+              className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 font-bold text-emerald-600 transition-colors hover:bg-emerald-100"
             >
-              🧭 {course.count}
+              🧭 내 코스 {course.count}
             </button>
           )}
         </p>
