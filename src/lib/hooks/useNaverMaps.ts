@@ -24,6 +24,12 @@ function loadScript(clientId: string): Promise<void> {
         ? resolve()
         : reject(new Error('naver.maps 미정의'))
     if (existing) {
+      // 이미 로드 완료된 script 태그라면 load 이벤트는 재발화하지 않는다.
+      // window.naver.maps 가 이미 존재하면 즉시 resolve — 그렇지 않으면 load 대기.
+      if ((window as any).naver?.maps) {
+        resolve()
+        return
+      }
       existing.addEventListener('load', onLoad)
       existing.addEventListener('error', () => reject(new Error('스크립트 로드 실패')))
       return
