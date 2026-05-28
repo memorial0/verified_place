@@ -9,6 +9,7 @@ export type VerificationCode =
   | 'michelin'
   | 'blue_ribbon'
   | 'centennial'
+  | 'exemplary'
   | 'good_price'
   | 'celebrity'
 
@@ -61,8 +62,22 @@ export const VERIFICATION_META: Record<
   michelin: { label: '미슐랭', emoji: '⭐', color: '#C4002B' },
   blue_ribbon: { label: '블루리본', emoji: '🎀', color: '#1E40AF' },
   centennial: { label: '백년가게', emoji: '🏅', color: '#047857' },
+  exemplary: { label: '모범음식점', emoji: '✅', color: '#0E7490' },
   good_price: { label: '착한가격업소', emoji: '💰', color: '#EA580C' },
   celebrity: { label: '연예인 픽', emoji: '📺', color: '#7C3AED' },
+}
+
+// ── graceful 폴백 ────────────────────────────────────────────────────────────
+// production DB 가 코드 배포보다 앞서 새 verification_type 을 시드해도 (예: 0007/0008
+// 모범음식점 사고) VERIFICATION_META[unknown] 가 undefined 가 되어 컴포넌트가 터지지
+// 않도록, 항상 아래 헬퍼를 통해 메타에 접근한다. 컴포넌트에서 VERIFICATION_META[code]
+// 를 직접 인덱싱하지 말 것.
+const FALLBACK_META = { label: '인증', emoji: '📍', color: '#6B7280' } as const
+
+export function getVerificationMeta(
+  code: string,
+): { label: string; emoji: string; color: string } {
+  return (VERIFICATION_META as Record<string, typeof FALLBACK_META>)[code] ?? FALLBACK_META
 }
 
 /** 인증 신뢰도/노출 우선순위 (앞쪽이 높음) — 마커 색상·대표 인증 결정에 사용 */
@@ -70,16 +85,23 @@ export const VERIFICATION_PRIORITY: VerificationCode[] = [
   'michelin',
   'blue_ribbon',
   'centennial',
+  'exemplary',
   'good_price',
   'celebrity',
 ]
 
-/** 한 식당의 대표(최상위) 인증 1건 — 마커 색상/대표 뱃지에 사용 */
+/**
+ * 한 식당의 대표(최상위) 인증 1건 — 마커 색상/대표 뱃지에 사용.
+ * 알려지지 않은 code 는 우선순위 끝으로 밀어, 알려진 인증이 있으면 그쪽이 대표가 된다.
+ * (이전 버전은 indexOf(-1) 때문에 unknown 이 오히려 최우선이 됐음.)
+ */
 export function primaryVerification(r: Restaurant): Verification | undefined {
-  return [...r.verifications].sort(
-    (a, b) =>
-      VERIFICATION_PRIORITY.indexOf(a.code) - VERIFICATION_PRIORITY.indexOf(b.code),
-  )[0]
+  if (r.verifications.length === 0) return undefined
+  const order = (code: VerificationCode) => {
+    const i = VERIFICATION_PRIORITY.indexOf(code)
+    return i < 0 ? VERIFICATION_PRIORITY.length : i
+  }
+  return [...r.verifications].sort((a, b) => order(a.code) - order(b.code))[0]
 }
 
 export type FilterValue = 'all' | VerificationCode
@@ -89,6 +111,7 @@ export const FILTER_OPTIONS: { value: FilterValue; label: string; color: string 
   { value: 'michelin', label: '미슐랭', color: VERIFICATION_META.michelin.color },
   { value: 'blue_ribbon', label: '블루리본', color: VERIFICATION_META.blue_ribbon.color },
   { value: 'centennial', label: '백년가게', color: VERIFICATION_META.centennial.color },
+  { value: 'exemplary', label: '모범음식점', color: VERIFICATION_META.exemplary.color },
   { value: 'good_price', label: '착한가격', color: VERIFICATION_META.good_price.color },
   { value: 'celebrity', label: '연예인 픽', color: VERIFICATION_META.celebrity.color },
 ]

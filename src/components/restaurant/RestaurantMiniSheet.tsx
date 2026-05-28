@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  VERIFICATION_META,
+  getVerificationMeta,
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
@@ -35,7 +35,8 @@ export function RestaurantMiniSheet({
   onClose,
 }: Props) {
   const primary = primaryVerification(restaurant)
-  const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
+  const primaryMeta = primary ? getVerificationMeta(primary.code) : null
+  const accent = primaryMeta?.color ?? '#111827'
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-3">
@@ -62,15 +63,13 @@ export function RestaurantMiniSheet({
 
         {/* 대표 인증 + 키워드 */}
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          {primary && (
+          {primary && primaryMeta && (
             <span
               className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold"
               style={{ color: accent, backgroundColor: `${accent}14` }}
             >
-              {VERIFICATION_META[primary.code].emoji.repeat(
-                Math.max(1, primary.rating ?? 1),
-              )}
-              {VERIFICATION_META[primary.code].label}
+              {primaryMeta.emoji.repeat(Math.max(1, primary.rating ?? 1))}
+              {primaryMeta.label}
             </span>
           )}
           {restaurant.keywords.slice(0, 2).map((k) => (

@@ -1,5 +1,5 @@
 import {
-  VERIFICATION_META,
+  getVerificationMeta,
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
@@ -36,7 +36,7 @@ export function RestaurantDetail({
   onBack,
 }: Props) {
   const primary = primaryVerification(restaurant)
-  const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
+  const accent = primary ? getVerificationMeta(primary.code).color : '#111827'
 
   // 네이버 지도 외부 링크 — 이름(없으면 주소)으로 검색해 해당 장소를 띄운다.
   // ⚠️ 네이버 검색 인덱스는 한국어 상호 기준이라 화면 로케일과 무관하게
