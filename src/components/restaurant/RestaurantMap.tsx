@@ -9,6 +9,7 @@ import {
 } from '@/lib/mock/restaurants'
 import type { LatLng } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { REGION_CENTERS, type Region } from '@/lib/region/region'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
 import { getReactOverlayClass } from '@/lib/naver/overlay'
 
@@ -19,6 +20,8 @@ interface Props {
   restaurants: Restaurant[]
   /** 표시 로케일 — 마커 aria-label, 팝업 제목에 displayName 으로 적용 */
   locale: Locale
+  /** 지역 — 변경 시 해당 거점 좌표로 panTo. 'all' 은 이동하지 않음 */
+  region: Region
   /** 오버레이/강조 대상 (hover ?? preview ?? selected) */
   activeId: string | null
   /** panTo 대상 (preview ?? selected) */
@@ -36,6 +39,7 @@ interface Props {
 export function RestaurantMap({
   restaurants,
   locale,
+  region,
   activeId,
   selectedId,
   previewId,
@@ -77,6 +81,14 @@ export function RestaurantMap({
     if (!r) return
     mapRef.current.panTo(new naver.maps.LatLng(r.lat, r.lng))
   }, [selectedId, restaurants, naver])
+
+  // 지역 변경 시 해당 거점 좌표로 panTo. 'all' 은 사용자 시야 유지.
+  // 첫 마운트에서 region='chuncheon'이면 DEFAULT_CENTER 와 동일 좌표라 시각 변화 0.
+  useEffect(() => {
+    if (region === 'all' || !mapRef.current || !naver) return
+    const center = REGION_CENTERS[region]
+    mapRef.current.panTo(new naver.maps.LatLng(center.lat, center.lng))
+  }, [region, naver])
 
   // 경로가 생기면 출발지+도착지가 모두 보이도록 지도 범위 맞춤
   useEffect(() => {

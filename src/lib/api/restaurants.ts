@@ -1,8 +1,4 @@
-import {
-  type FilterValue,
-  type Restaurant,
-  type VerificationCode,
-} from '@/lib/mock/restaurants'
+import { type Restaurant, type VerificationCode } from '@/lib/mock/restaurants'
 import { RESTAURANT_DATASET } from '@/lib/data/restaurants'
 
 // ---- GET /api/restaurants 응답 형태 (snake_case, DB Row 기반) ----------------
@@ -58,33 +54,24 @@ export function mapApiRestaurant(r: ApiRestaurant): Restaurant {
 export type DataSource = 'live' | 'fallback'
 
 /**
- * 식당 목록 조회.
- * - 정상: `/api/restaurants?verification=...` 응답 사용 (source: 'live')
- * - 실패(API 미연동/네트워크/500 등): Mock 데이터를 클라이언트 필터링하여 사용 (source: 'fallback')
- *   → Supabase를 켜지 않은 로컬 개발 환경에서도 화면이 그대로 동작한다.
+ * 식당 전체 조회 (region/verification 필터링은 클라이언트 측에서 수행).
+ * - 정상: GET /api/restaurants 응답 (source: 'live')
+ * - 실패/빈 응답: RESTAURANT_DATASET fallback (source: 'fallback')
+ *   → Supabase 미연결 로컬 환경에서도 화면이 그대로 동작.
  */
-export async function fetchRestaurants(
-  filter: FilterValue,
-): Promise<{ restaurants: Restaurant[]; source: DataSource }> {
-  const qs = filter === 'all' ? '' : `?verification=${encodeURIComponent(filter)}`
-
+export async function fetchRestaurants(): Promise<{
+  restaurants: Restaurant[]
+  source: DataSource
+}> {
   try {
-    const res = await fetch(`/api/restaurants${qs}`, { cache: 'no-store' })
+    const res = await fetch(`/api/restaurants`, { cache: 'no-store' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const json = (await res.json()) as { data?: ApiRestaurant[] }
     const mapped = (json.data ?? []).map(mapApiRestaurant)
-    // 라이브가 비어 있으면(아직 미시드/미연결) Mock 데이터셋을 유지 → 화면이 비지 않음
-    if (mapped.length === 0) return { restaurants: filterMock(filter), source: 'fallback' }
+    // 라이브가 비어 있으면(아직 미시드/미연결) RESTAURANT_DATASET 으로 폴백 → 화면 안 비움
+    if (mapped.length === 0) return { restaurants: RESTAURANT_DATASET, source: 'fallback' }
     return { restaurants: mapped, source: 'live' }
   } catch {
-    return { restaurants: filterMock(filter), source: 'fallback' }
+    return { restaurants: RESTAURANT_DATASET, source: 'fallback' }
   }
-}
-
-function filterMock(filter: FilterValue): Restaurant[] {
-  return filter === 'all'
-    ? RESTAURANT_DATASET
-    : RESTAURANT_DATASET.filter((r) =>
-        r.verifications.some((v) => v.code === filter),
-      )
 }

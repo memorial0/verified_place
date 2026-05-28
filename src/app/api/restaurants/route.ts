@@ -23,7 +23,9 @@ export async function GET(req: NextRequest) {
   const lat = searchParams.get('lat')
   const lng = searchParams.get('lng')
   const radius = Number(searchParams.get('radius') ?? 2000)
-  const limit = Number(searchParams.get('limit') ?? 50)
+  // 124행(2026-05) → 500은 한동안 여유. 검증/지역 필터링은 클라이언트에서 수행하므로
+  // 서버는 전체를 한 번에 돌려준다. 500+ 도달 시 region 을 DB 쿼리로 푸시할 것.
+  const limit = Number(searchParams.get('limit') ?? 500)
 
   // 좌표가 주어지면 PostGIS 반경 검색 RPC 사용 (거리순 정렬)
   if (lat && lng) {
