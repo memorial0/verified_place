@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
        keywords, tagline, reason_to_visit,
        category:categories(slug, name_ko),
        verifications:restaurant_verifications(
-         grade, rating, awarded_year, recommender,
+         grade, rating, awarded_year, recommender, metadata,
          type:verification_types(code, name_ko, badge_color)
        )`,
     )
