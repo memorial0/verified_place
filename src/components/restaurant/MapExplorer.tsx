@@ -13,7 +13,9 @@ import {
   type LatLng,
 } from '@/lib/api/directions'
 import { type Locale } from '@/lib/i18n/display'
+import { filterByRegion, type Region } from '@/lib/region/region'
 import { FilterChips } from './FilterChips'
+import { RegionChips } from './RegionChips'
 import { RestaurantSidebar } from './RestaurantSidebar'
 import { RestaurantMap } from './RestaurantMap'
 import { RestaurantMiniSheet } from './RestaurantMiniSheet'
@@ -44,8 +46,22 @@ export function MapExplorer() {
   // 자식 컴포넌트(Sidebar/Map/MiniSheet) 시그니처는 그대로 둔다.
   const locale: Locale = 'ko'
 
+  // ─── 지역 ────────────────────────────────────────────────────────────────
+  // 춘천 거점 제품 기본값. 새로고침 시 항상 chuncheon 으로 초기화(MVP).
+  // 추후 URL/localStorage 동기화는 별도 PR.
+  const [region, setRegion] = useState<Region>('chuncheon')
   const [filter, setFilter] = useState<FilterValue>('all')
-  const { restaurants, state } = useRestaurants(filter)
+  const { restaurants: allRestaurants, state } = useRestaurants()
+
+  // 클라이언트 2단계 필터링:
+  //   allRestaurants → RegionChips 가 cross-region 카운트 (전국/춘천/서울)
+  //   regionScoped   → FilterChips 가 region 내 검증 카운트
+  //   displayed      → 지도/사이드바 표시 데이터
+  const regionScoped = filterByRegion(allRestaurants, region)
+  const displayed =
+    filter === 'all'
+      ? regionScoped
+      : regionScoped.filter((r) => r.verifications.some((v) => v.code === filter))
   const { isSaved, toggle: toggleSave, savedCount } = useSavedRestaurants()
   const course = useCourse()
 
@@ -62,20 +78,20 @@ export function MapExplorer() {
 
   // 필터로 목록이 줄어도 코스/저장 항목을 해석할 수 있도록, 본 적 있는 식당을 누적 보관
   const lookupRef = useRef<Map<string, Restaurant>>(new Map())
-  for (const r of restaurants) lookupRef.current.set(r.id, r)
+  for (const r of allRestaurants) lookupRef.current.set(r.id, r)
   const courseItems = course.items
     .map((id) => lookupRef.current.get(id))
     .filter((r): r is Restaurant => Boolean(r))
 
   // 활성 식당이 목록에서 사라지면 관련 상태 해제
   useEffect(() => {
-    const gone = (id: string | null) => id && !restaurants.some((r) => r.id === id)
+    const gone = (id: string | null) => id && !displayed.some((r) => r.id === id)
     if (gone(selectedId)) {
       setSelectedId(null)
       setRoute(null)
     }
     if (gone(previewId)) setPreviewId(null)
-  }, [restaurants, selectedId, previewId])
+  }, [displayed, selectedId, previewId])
 
   // 코스 구성/순서가 바뀌면 그려둔 코스 경로는 낡으므로 해제 (단일 식당 경로는 유지)
   useEffect(() => {
@@ -146,25 +162,36 @@ export function MapExplorer() {
   }
 
   const previewRestaurant = previewId
-    ? restaurants.find((r) => r.id === previewId) ?? null
+    ? displayed.find((r) => r.id === previewId) ?? null
     : null
 
   return (
     <div className="flex h-full flex-col">
       <div className="z-10 shrink-0 overflow-x-auto border-b border-gray-100 bg-white/80 px-4 py-2.5 backdrop-blur">
-        <FilterChips
-          active={filter}
-          onChange={(v) => {
-            setFilter(v)
-            setHoverId(null)
-          }}
-          restaurants={restaurants}
-        />
+        <div className="flex flex-col gap-2">
+          <RegionChips
+            active={region}
+            onChange={(r) => {
+              setRegion(r)
+              setHoverId(null)
+              setPreviewId(null)
+            }}
+            restaurants={allRestaurants}
+          />
+          <FilterChips
+            active={filter}
+            onChange={(v) => {
+              setFilter(v)
+              setHoverId(null)
+            }}
+            restaurants={regionScoped}
+          />
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col-reverse overflow-hidden md:flex-row">
         <RestaurantSidebar
-          restaurants={restaurants}
+          restaurants={displayed}
           locale={locale}
           activeId={activeId}
           selectedId={selectedId}
@@ -194,8 +221,9 @@ export function MapExplorer() {
         />
         <div className="relative min-h-0 flex-1">
           <RestaurantMap
-            restaurants={restaurants}
+            restaurants={displayed}
             locale={locale}
+            region={region}
             activeId={activeId}
             selectedId={previewId ?? selectedId}
             previewId={previewId}
