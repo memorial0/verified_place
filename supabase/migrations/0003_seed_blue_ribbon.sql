@@ -4,6 +4,7 @@
 -- 좌표/주소 출처: 카카오 Local 지오코딩 (src/lib/data/blue-ribbon.geocoded.json)
 -- ⚠️ 인증 연결은 restaurants.name 매칭 기준 — 동일 이름이 여러 행이면 모두 연결될 수 있음.
 
+-- 미슐랭 행에 붙은 blue_ribbon 인증까지 제거(restaurants 삭제 cascade로는 안 지워짐)
 delete from public.restaurant_verifications
   where verification_type_id = (select id from public.verification_types where code = 'blue_ribbon');
 delete from public.restaurants where data_source = 'blue_ribbon';
