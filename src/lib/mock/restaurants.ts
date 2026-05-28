@@ -20,6 +20,17 @@ export interface Verification {
   /** 연예인 픽 추천 출처(가상) */
   recommender?: string
   awardedYear?: number
+  /**
+   * 인증유형별 가변 속성 (DB restaurant_verifications.metadata jsonb).
+   * 비어 있으면 매퍼가 undefined 로 정규화한다.
+   *   centennial → { desc: string }                        — 가게의 역사/스토리
+   *   good_price → { menu: string }                        — 착한가격 책정된 대표 메뉴
+   *   exemplary  → { primary_menu, seating, wheelchair_accessible }
+   *                                                         — 대표메뉴/좌석/휠체어 접근성
+   *   michelin/blue_ribbon → (사실상 비어 있음, 등급은 rating 으로)
+   * 화면 측은 lib/verification/metadata 헬퍼로 안전 추출.
+   */
+  metadata?: Record<string, unknown>
 }
 
 export interface Restaurant {
@@ -39,6 +50,8 @@ export interface Restaurant {
   sido?: string
   /** 시군구 (예: '춘천시') */
   sigungu?: string
+  /** 대표 전화번호. 정적 데이터셋(michelin/blue_ribbon)은 원천 미포함이라 보통 비어 있다. */
+  phone?: string
   verifications: Verification[]
 
   // ── 다국어 보조 필드 (0006_restaurant_i18n 대응) ─────────────────────────────

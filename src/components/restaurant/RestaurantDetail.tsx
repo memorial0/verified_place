@@ -6,6 +6,7 @@ import {
 import type { RouteSummary } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
 import { VerificationBadge } from './VerificationBadge'
+import { VerificationMetaPanel } from './VerificationMetaPanel'
 
 interface Props {
   restaurant: Restaurant
@@ -101,7 +102,7 @@ export function RestaurantDetail({
           </div>
         )}
 
-        {/* 5) 인증 뱃지 */}
+        {/* 5) 인증 뱃지 + 인증별 metadata (있는 인증만) */}
         <section className="mt-5">
           <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
             인증
@@ -111,17 +112,30 @@ export function RestaurantDetail({
               <VerificationBadge key={`${v.code}-${i}`} verification={v} />
             ))}
           </div>
+          <VerificationMetaPanel verifications={restaurant.verifications} />
         </section>
 
-        {/* 6) 주소 */}
+        {/* 6) 연락처 + 주소 */}
         <section className="mt-5">
           <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-            주소
+            연락처
           </h3>
-          <p className="flex items-start gap-1.5 text-sm text-gray-700">
-            <span aria-hidden>📍</span>
-            {restaurant.addressRoad}
-          </p>
+          <div className="flex flex-col gap-1.5 text-sm text-gray-700">
+            {restaurant.phone && (
+              <a
+                href={`tel:${restaurant.phone}`}
+                className="flex items-start gap-1.5 underline-offset-2 hover:underline"
+                style={{ color: accent }}
+              >
+                <span aria-hidden>📞</span>
+                {restaurant.phone}
+              </a>
+            )}
+            <p className="flex items-start gap-1.5">
+              <span aria-hidden>📍</span>
+              {restaurant.addressRoad}
+            </p>
+          </div>
         </section>
       </div>
 

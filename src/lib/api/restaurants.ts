@@ -7,6 +7,13 @@ interface ApiVerification {
   rating: number | null
   awarded_year: number | null
   recommender: string | null
+  // 인증유형별 가변 속성 JSONB.
+  //   centennial   → { desc: string }
+  //   good_price   → { menu: string }
+  //   exemplary    → { primary_menu: string, seating: '입식'|'좌식'|'둘다', wheelchair_accessible: boolean }
+  //   michelin/blue_ribbon → 사실상 비어 있음
+  // 형태 변동을 흡수하려고 일부러 느슨하게 둔다. UI 측 헬퍼에서 코드별로 안전 추출.
+  metadata: Record<string, unknown> | null
   type: { code: string; name_ko: string; badge_color: string | null } | null
 }
 
@@ -19,6 +26,7 @@ interface ApiRestaurant {
   longitude: number | null
   sido: string | null
   sigungu: string | null
+  phone: string | null
   keywords: string[] | null
   tagline: string | null
   reason_to_visit: string | null
@@ -40,6 +48,7 @@ export function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     lng: r.longitude ?? 0,
     sido: r.sido ?? undefined,
     sigungu: r.sigungu ?? undefined,
+    phone: r.phone ?? undefined,
     verifications: (r.verifications ?? [])
       .filter((v) => v.type?.code)
       .map((v) => ({
@@ -47,6 +56,9 @@ export function mapApiRestaurant(r: ApiRestaurant): Restaurant {
         rating: v.rating ?? undefined,
         recommender: v.recommender ?? undefined,
         awardedYear: v.awarded_year ?? undefined,
+        // 빈 객체({})면 undefined 로 정규화 — UI 측에서 'metadata 있음' 판정이 단순해진다.
+        metadata:
+          v.metadata && Object.keys(v.metadata).length > 0 ? v.metadata : undefined,
       })),
   }
 }
