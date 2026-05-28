@@ -5,9 +5,11 @@ import {
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
+import { displayName, type Locale } from '@/lib/i18n/display'
 
 interface Props {
   restaurant: Restaurant
+  locale: Locale
   /** 이미 내 코스에 담겼는지 */
   inCourse: boolean
   dirLoading: boolean
@@ -24,6 +26,7 @@ interface Props {
  */
 export function RestaurantMiniSheet({
   restaurant,
+  locale,
   inCourse,
   dirLoading,
   onDirections,
@@ -44,7 +47,7 @@ export function RestaurantMiniSheet({
               {restaurant.category}
             </span>
             <h3 className="truncate text-lg font-extrabold leading-snug text-gray-900">
-              {restaurant.name}
+              {displayName(restaurant, locale)}
             </h3>
           </div>
           <button

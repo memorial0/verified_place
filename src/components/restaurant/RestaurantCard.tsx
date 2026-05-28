@@ -4,9 +4,11 @@ import {
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
+import { displayName, type Locale } from '@/lib/i18n/display'
 
 interface Props {
   restaurant: Restaurant
+  locale: Locale
   active: boolean
   saved: boolean
   onHover: (id: string | null) => void
@@ -22,7 +24,7 @@ interface Props {
  */
 export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
   function RestaurantCard(
-    { restaurant, active, saved, onHover, onSelect, onToggleSave },
+    { restaurant, locale, active, saved, onHover, onSelect, onToggleSave },
     ref,
   ) {
     const primary = primaryVerification(restaurant)
@@ -59,7 +61,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
 
         {/* 1) 이름 */}
         <h3 className="pr-9 text-lg font-extrabold leading-snug text-gray-900">
-          {restaurant.name}
+          {displayName(restaurant, locale)}
         </h3>
 
         {/* 2) 대표 키워드 3개 */}

@@ -6,6 +6,7 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import type { RouteSummary } from '@/lib/api/directions'
+import { displayName, type Locale } from '@/lib/i18n/display'
 
 /** 네이버 경유지 한도(5) → 출발+경유5+도착 = 총 7지점 */
 const MAX_COURSE_POINTS = 7
@@ -13,6 +14,7 @@ const MAX_COURSE_POINTS = 7
 interface Props {
   /** 코스에 담긴 식당 (담은 순서) */
   items: Restaurant[]
+  locale: Locale
   onSelect: (id: string) => void
   /** 순서 이동 (from → to) */
   onMove: (from: number, to: number) => void
@@ -35,6 +37,7 @@ const fmtDur = (s: number) => `${Math.round(s / 60)}분`
  */
 export function CoursePanel({
   items,
+  locale,
   onSelect,
   onMove,
   onRemove,
@@ -107,7 +110,7 @@ export function CoursePanel({
                   onClick={() => onSelect(r.id)}
                   className="min-w-0 flex-1 text-left"
                 >
-                  <p className="truncate text-sm font-bold text-gray-900">{r.name}</p>
+                  <p className="truncate text-sm font-bold text-gray-900">{displayName(r, locale)}</p>
                   <p className="truncate text-xs text-gray-400">{r.category}</p>
                 </button>
 

@@ -4,10 +4,12 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import type { RouteSummary } from '@/lib/api/directions'
+import { displayName, type Locale } from '@/lib/i18n/display'
 import { VerificationBadge } from './VerificationBadge'
 
 interface Props {
   restaurant: Restaurant
+  locale: Locale
   saved: boolean
   dirLoading: boolean
   routeSummary: RouteSummary | null
@@ -25,6 +27,7 @@ const fmtDur = (s: number) => `${Math.round(s / 60)}분`
  */
 export function RestaurantDetail({
   restaurant,
+  locale,
   saved,
   dirLoading,
   routeSummary,
@@ -35,7 +38,9 @@ export function RestaurantDetail({
   const primary = primaryVerification(restaurant)
   const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
 
-  // 네이버 지도 외부 링크 — 이름(없으면 주소)으로 검색해 해당 장소를 띄운다
+  // 네이버 지도 외부 링크 — 이름(없으면 주소)으로 검색해 해당 장소를 띄운다.
+  // ⚠️ 네이버 검색 인덱스는 한국어 상호 기준이라 화면 로케일과 무관하게
+  //    restaurant.name(ko) 을 그대로 쓴다. displayName 으로 바꾸지 말 것.
   const naverMapUrl = `https://map.naver.com/p/search/${encodeURIComponent(
     restaurant.name || restaurant.addressRoad,
   )}`
@@ -60,7 +65,7 @@ export function RestaurantDetail({
 
         {/* 1) 이름 */}
         <h2 className="mt-0.5 text-2xl font-extrabold leading-tight text-gray-900">
-          {restaurant.name}
+          {displayName(restaurant, locale)}
         </h2>
 
         {/* 2) 대표 키워드 */}

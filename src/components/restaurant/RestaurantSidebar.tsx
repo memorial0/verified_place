@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { Restaurant } from '@/lib/mock/restaurants'
 import type { FetchState } from '@/lib/hooks/useRestaurants'
 import type { RouteSummary } from '@/lib/api/directions'
+import type { Locale } from '@/lib/i18n/display'
 import { RestaurantCard } from './RestaurantCard'
 import { RestaurantDetail } from './RestaurantDetail'
 import { CoursePanel } from './CoursePanel'
@@ -27,6 +28,7 @@ export interface CourseControls {
 
 interface Props {
   restaurants: Restaurant[]
+  locale: Locale
   activeId: string | null
   /** 클릭으로 고정 선택된 식당 → 상세 패널 전환 */
   selectedId: string | null
@@ -44,6 +46,7 @@ interface Props {
 
 export function RestaurantSidebar({
   restaurants,
+  locale,
   activeId,
   selectedId,
   state,
@@ -76,6 +79,7 @@ export function RestaurantSidebar({
   const body = selected ? (
     <RestaurantDetail
       restaurant={selected}
+      locale={locale}
       saved={isSaved(selected.id)}
       dirLoading={dirLoading}
       routeSummary={routeSummary}
@@ -86,6 +90,7 @@ export function RestaurantSidebar({
   ) : course.show ? (
     <CoursePanel
       items={course.items}
+      locale={locale}
       onSelect={onSelect}
       onMove={course.move}
       onRemove={course.remove}
@@ -130,6 +135,7 @@ export function RestaurantSidebar({
                 cardRefs.current[r.id] = el
               }}
               restaurant={r}
+              locale={locale}
               active={activeId === r.id}
               saved={isSaved(r.id)}
               onHover={onHover}

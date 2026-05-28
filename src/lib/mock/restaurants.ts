@@ -39,6 +39,18 @@ export interface Restaurant {
   /** 시군구 (예: '춘천시') */
   sigungu?: string
   verifications: Verification[]
+
+  // ── 다국어 보조 필드 (0006_restaurant_i18n 대응) ─────────────────────────────
+  // 비어 있으면 ko 슬롯(name/tagline/reason)으로 폴백. 화면은 lib/i18n/display 헬퍼 사용.
+  nameEn?: string
+  nameJa?: string
+  nameZh?: string
+  taglineEn?: string
+  taglineJa?: string
+  taglineZh?: string
+  reasonEn?: string
+  reasonJa?: string
+  reasonZh?: string
 }
 
 /** 인증 유형별 표시 메타데이터 (라벨/이모지/브랜드 컬러) — 0001_init.sql 시드와 색상 일치 */
