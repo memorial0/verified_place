@@ -8,6 +8,7 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import type { LatLng } from '@/lib/api/directions'
+import { displayName, type Locale } from '@/lib/i18n/display'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
 import { getReactOverlayClass } from '@/lib/naver/overlay'
 
@@ -16,6 +17,8 @@ const DEFAULT_CENTER = { lat: 37.8813, lng: 127.73 }
 
 interface Props {
   restaurants: Restaurant[]
+  /** 표시 로케일 — 마커 aria-label, 팝업 제목에 displayName 으로 적용 */
+  locale: Locale
   /** 오버레이/강조 대상 (hover ?? preview ?? selected) */
   activeId: string | null
   /** panTo 대상 (preview ?? selected) */
@@ -32,6 +35,7 @@ interface Props {
 
 export function RestaurantMap({
   restaurants,
+  locale,
   activeId,
   selectedId,
   previewId,
@@ -137,6 +141,7 @@ export function RestaurantMap({
             >
               <MarkerPin
                 restaurant={r}
+                locale={locale}
                 active={activeId === r.id}
                 onClick={() => onPreview(r.id)}
               />
@@ -152,7 +157,7 @@ export function RestaurantMap({
               yAnchor={1.55}
               zIndex={50}
             >
-              <PopupCard restaurant={active} onClose={onClear} />
+              <PopupCard restaurant={active} locale={locale} onClose={onClear} />
             </MapOverlay>
           )}
 
@@ -231,10 +236,12 @@ function MapOverlay({
 /** 대표 인증 색상으로 칠해진 핀. active일 때 확대 + 흰 링 강조. */
 function MarkerPin({
   restaurant,
+  locale,
   active,
   onClick,
 }: {
   restaurant: Restaurant
+  locale: Locale
   active: boolean
   onClick: () => void
 }) {
@@ -249,7 +256,7 @@ function MarkerPin({
         e.stopPropagation()
         onClick()
       }}
-      aria-label={restaurant.name}
+      aria-label={displayName(restaurant, locale)}
       className="flex flex-col items-center"
     >
       <span
@@ -318,9 +325,11 @@ function Centered({ children }: { children: React.ReactNode }) {
 /** 보조 요소로서의 지도 팝업 — 이름/키워드/한 줄 설명만 간결하게. 상세는 사이드바 카드. */
 function PopupCard({
   restaurant,
+  locale,
   onClose,
 }: {
   restaurant: Restaurant
+  locale: Locale
   onClose: () => void
 }) {
   const primary = primaryVerification(restaurant)
@@ -344,7 +353,7 @@ function PopupCard({
           ✕
         </button>
 
-        <h3 className="pr-6 text-base font-bold text-gray-900">{restaurant.name}</h3>
+        <h3 className="pr-6 text-base font-bold text-gray-900">{displayName(restaurant, locale)}</h3>
         {restaurant.keywords.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
             {restaurant.keywords.slice(0, 3).map((k) => (

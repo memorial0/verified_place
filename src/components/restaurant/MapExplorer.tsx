@@ -12,6 +12,7 @@ import {
   type DirectionsResult,
   type LatLng,
 } from '@/lib/api/directions'
+import { type Locale } from '@/lib/i18n/display'
 import { FilterChips } from './FilterChips'
 import { RestaurantSidebar } from './RestaurantSidebar'
 import { RestaurantMap } from './RestaurantMap'
@@ -34,6 +35,15 @@ const MAX_COURSE_POINTS = 7
  *   hover       → hoverId (마커 강조 + 정보 팝업)
  */
 export function MapExplorer() {
+  // ─── 로케일 ──────────────────────────────────────────────────────────────
+  // 임시 상수 (ko 고정). 헬퍼가 ko 분기로 떨어지므로 displayName(r, locale) === r.name.
+  //
+  // 로케일 전환 UX 도입 시 이 줄만 교체:
+  //   (가) URL 기반:  usePathname()/useSearchParams() 로 /en|/ja|/zh 또는 ?lang= 파싱
+  //   (나) Context:  layout.tsx 에 LocaleProvider 후 const locale = useLocale()
+  // 자식 컴포넌트(Sidebar/Map/MiniSheet) 시그니처는 그대로 둔다.
+  const locale: Locale = 'ko'
+
   const [filter, setFilter] = useState<FilterValue>('all')
   const { restaurants, state } = useRestaurants(filter)
   const { isSaved, toggle: toggleSave, savedCount } = useSavedRestaurants()
@@ -155,6 +165,7 @@ export function MapExplorer() {
       <div className="flex min-h-0 flex-1 flex-col-reverse overflow-hidden md:flex-row">
         <RestaurantSidebar
           restaurants={restaurants}
+          locale={locale}
           activeId={activeId}
           selectedId={selectedId}
           state={state}
@@ -184,6 +195,7 @@ export function MapExplorer() {
         <div className="relative min-h-0 flex-1">
           <RestaurantMap
             restaurants={restaurants}
+            locale={locale}
             activeId={activeId}
             selectedId={previewId ?? selectedId}
             previewId={previewId}
@@ -195,6 +207,7 @@ export function MapExplorer() {
           {previewRestaurant && (
             <RestaurantMiniSheet
               restaurant={previewRestaurant}
+              locale={locale}
               inCourse={course.has(previewRestaurant.id)}
               dirLoading={dirLoading}
               onDirections={requestDirections}
