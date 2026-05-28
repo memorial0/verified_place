@@ -75,10 +75,22 @@ function michelinToRestaurant(g: MichelinRow): Restaurant {
     addressRoad: g.addressRoad,
     lat: g.lat,
     lng: g.lng,
+    // 현재 MICHELIN_SEOUL_2025 는 서울 전용. 부산 등 확장 시 g 에 sido 필드 추가.
+    sido: '서울특별시',
+    sigungu: gu ?? undefined,
     verifications: [
       { code: 'michelin' as VerificationCode, rating: g.stars, awardedYear: g.year },
     ],
   }
+}
+
+// 블루리본 region 힌트(서울/부산/...) → DB 표기 sido. 현재 데이터는 전부 '서울'.
+const BR_REGION_TO_SIDO: Record<string, string> = {
+  서울: '서울특별시', 부산: '부산광역시', 대구: '대구광역시', 인천: '인천광역시',
+  광주: '광주광역시', 대전: '대전광역시', 울산: '울산광역시', 세종: '세종특별자치시',
+  경기: '경기도', 강원: '강원특별자치도', 충북: '충청북도', 충남: '충청남도',
+  전북: '전북특별자치도', 전남: '전라남도', 경북: '경상북도', 경남: '경상남도',
+  제주: '제주특별자치도',
 }
 
 function blueRibbonToRestaurant(g: BlueRibbonRow): Restaurant {
@@ -94,6 +106,8 @@ function blueRibbonToRestaurant(g: BlueRibbonRow): Restaurant {
     addressRoad: g.addressRoad,
     lat: g.lat,
     lng: g.lng,
+    sido: BR_REGION_TO_SIDO[g.region] ?? undefined,
+    sigungu: gu ?? undefined,
     verifications: [
       { code: 'blue_ribbon' as VerificationCode, rating: g.ribbons, awardedYear: g.year },
     ],
