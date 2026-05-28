@@ -1,4 +1,4 @@
-import { VERIFICATION_META, type Verification } from '@/lib/mock/restaurants'
+import { getVerificationMeta, type Verification } from '@/lib/mock/restaurants'
 
 /**
  * 인증 1건을 브랜드 컬러 뱃지로 표시.
@@ -6,7 +6,7 @@ import { VERIFICATION_META, type Verification } from '@/lib/mock/restaurants'
  * - 연예인 픽: 추천 출처를 함께 표기
  */
 export function VerificationBadge({ verification }: { verification: Verification }) {
-  const meta = VERIFICATION_META[verification.code]
+  const meta = getVerificationMeta(verification.code)
   const emojis = meta.emoji.repeat(Math.max(1, verification.rating ?? 1))
   const suffix = verification.recommender ? ` · ${verification.recommender}` : ''
 

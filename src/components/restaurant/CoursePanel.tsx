@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  VERIFICATION_META,
+  getVerificationMeta,
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
@@ -92,7 +92,7 @@ export function CoursePanel({
         ) : (
           items.map((r, i) => {
             const primary = primaryVerification(r)
-            const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
+            const accent = primary ? getVerificationMeta(primary.code).color : '#111827'
             return (
               <div
                 key={r.id}

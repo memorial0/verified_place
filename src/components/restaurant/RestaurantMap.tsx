@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  VERIFICATION_META,
+  getVerificationMeta,
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
@@ -246,8 +246,9 @@ function MarkerPin({
   onClick: () => void
 }) {
   const primary = primaryVerification(restaurant)
-  const color = primary ? VERIFICATION_META[primary.code].color : '#111827'
-  const emoji = primary ? VERIFICATION_META[primary.code].emoji : '📍'
+  const meta = primary ? getVerificationMeta(primary.code) : null
+  const color = meta?.color ?? '#111827'
+  const emoji = meta?.emoji ?? '📍'
 
   return (
     <button
@@ -333,7 +334,7 @@ function PopupCard({
   onClose: () => void
 }) {
   const primary = primaryVerification(restaurant)
-  const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
+  const accent = primary ? getVerificationMeta(primary.code).color : '#111827'
 
   return (
     <div

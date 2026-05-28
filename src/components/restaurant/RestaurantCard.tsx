@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import {
-  VERIFICATION_META,
+  getVerificationMeta,
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
@@ -28,7 +28,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
     ref,
   ) {
     const primary = primaryVerification(restaurant)
-    const accent = primary ? VERIFICATION_META[primary.code].color : '#111827'
+    const accent = primary ? getVerificationMeta(primary.code).color : '#111827'
 
     return (
       <div
@@ -89,7 +89,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-gray-100 pt-2.5 text-xs text-gray-400">
           <span>{restaurant.category}</span>
           {restaurant.verifications.map((v, i) => {
-            const meta = VERIFICATION_META[v.code]
+            const meta = getVerificationMeta(v.code)
             return (
               <span
                 key={`${v.code}-${i}`}
