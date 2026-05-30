@@ -7,7 +7,12 @@ export interface RouteSummary {
   distance: number // m
   duration: number // s
   taxiFare?: number
+  tollFare?: number // 통행료(원)
+  fuelPrice?: number // 예상 유류비(원)
 }
+
+/** 네이버 경유지 한도 — Directions 15 기준 (출발+경유15+도착 = 총 17지점) */
+export const MAX_WAYPOINTS = 15
 
 export interface DirectionsResult {
   path: LatLng[]
@@ -43,7 +48,7 @@ export async function fetchDirections(
 
 /**
  * 여러 지점을 순서대로 잇는 자동차 경로 (코스 전체 길찾기).
- * points[0]=출발, points[last]=도착, 중간은 경유지(네이버 최대 5 → 총 7지점).
+ * points[0]=출발, points[last]=도착, 중간은 경유지(Directions 15 → 최대 15, 총 17지점).
  */
 export async function fetchRouteThrough(points: LatLng[]): Promise<DirectionsResult> {
   if (points.length < 2) throw new Error('경로에는 2지점 이상 필요')
@@ -52,7 +57,8 @@ export async function fetchRouteThrough(points: LatLng[]): Promise<DirectionsRes
     origin: fmt(points[0]),
     destination: fmt(points[points.length - 1]),
   })
-  const vias = points.slice(1, -1)
+  // 경유지는 출발/도착 사이만. 한도(15) 초과분은 서버에서도 잘리지만 여기서도 방어적으로 제한.
+  const vias = points.slice(1, -1).slice(0, MAX_WAYPOINTS)
   if (vias.length > 0) params.set('waypoints', vias.map(fmt).join('|'))
 
   const res = await fetch(`/api/directions?${params.toString()}`)

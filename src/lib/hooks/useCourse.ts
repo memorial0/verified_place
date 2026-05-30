@@ -57,9 +57,23 @@ export function useCourse() {
     })
   }, [])
 
+  /**
+   * 전체 순서를 통째로 교체 (순서 최적화 등). 안전장치로 기존과 "같은 원소 집합"일
+   * 때만 반영한다 — 길이가 다르거나 누락/추가가 있으면 무시(데이터 유실 방지).
+   */
+  const reorder = useCallback((nextIds: string[]) => {
+    setItems((prev) => {
+      if (nextIds.length !== prev.length) return prev
+      const a = [...prev].sort()
+      const b = [...nextIds].sort()
+      if (a.some((id, i) => id !== b[i])) return prev
+      return persist(nextIds)
+    })
+  }, [])
+
   const clear = useCallback(() => setItems(() => persist([])), [])
 
   const has = useCallback((id: string) => items.includes(id), [items])
 
-  return { items, has, add, remove, toggle, move, clear, count: items.length }
+  return { items, has, add, remove, toggle, move, reorder, clear, count: items.length }
 }
