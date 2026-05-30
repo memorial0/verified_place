@@ -19,9 +19,13 @@ export const runtime = 'edge'
  *   - business_hours: 객체. 허용 키만, 값은 trim 된 문자열만, 길이 제한 100자.
  *
  * 부가 동작:
- *   - name 이 실제로 바뀌면 name_en/ja/zh 를 null 로 초기화 → stale 다국어 표기 노출 방지
- *     (displayName 이 name 으로 폴백). 외부 지도 링크도 name(ko) 기준이라 정합성 유지.
  *   - 실제로 바뀐 필드마다 restaurant_edit_log 에 1행씩 감사 기록(no-op 은 기록 안 함).
+ *
+ * i18n 메모:
+ *   name 변경 시 name_en/ja/zh 초기화 로직은 의도적으로 빼 두었다. 이 컬럼들은 0006
+ *   마이그레이션 소속인데 라이브 DB 에 미적용이라 SELECT/UPDATE 하면 깨진다. 향후 다국어가
+ *   실제로 필요해지면 0006 적용 + (초기 SELECT 에 i18n 컬럼 추가 + name 변경 시 null 초기화
+ *   블록 복원)을 함께 진행할 것. 그때 외부 지도 링크는 name(ko) 기준이라 정합성은 유지된다.
  */
 
 const ALLOWED_TOP = new Set([
@@ -57,9 +61,6 @@ const MAX_LEN: Record<string, number> = {
   phone: 30,
   description: 2000,
 }
-
-// name 변경 시 stale 방지를 위해 함께 비울 다국어 컬럼.
-const NAME_I18N_COLS = ['name_en', 'name_ja', 'name_zh'] as const
 
 type Params = Promise<{ id: string }>
 
@@ -123,7 +124,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Params }) {
   const { data: current, error: readErr } = await admin
     .from('restaurants')
     .select(
-      'id, name, branch_name, tagline, reason_to_visit, phone, description, status, business_hours, name_en, name_ja, name_zh, updated_at',
+      'id, name, branch_name, tagline, reason_to_visit, phone, description, status, business_hours, updated_at',
     )
     .eq('id', id)
     .maybeSingle()
@@ -177,17 +178,6 @@ export async function PATCH(req: NextRequest, ctx: { params: Params }) {
 
   if (!sawAllowed) {
     return NextResponse.json({ error: 'No allowed fields' }, { status: 400 })
-  }
-
-  // name 이 실제로 바뀌면 다국어 표기 초기화(실제 값이 있던 컬럼만 → 변경으로 기록).
-  if ('name' in patch) {
-    for (const col of NAME_I18N_COLS) {
-      const oldT = (current as Record<string, unknown>)[col]
-      if (oldT != null) {
-        patch[col] = null
-        audit.push({ field: col, old_value: toText(oldT), new_value: null })
-      }
-    }
   }
 
   // 변경된 게 하나도 없으면(전부 no-op) 성공으로 끝낸다 — 굳이 UPDATE/로그 안 함.
