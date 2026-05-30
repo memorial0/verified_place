@@ -10,6 +10,8 @@ import {
   fetchRouteThrough,
   getCurrentPosition,
   MAX_WAYPOINTS,
+  DirectionsError,
+  type DirectionsErrorKind,
   type DirectionsResult,
   type LatLng,
 } from '@/lib/api/directions'
@@ -82,7 +84,8 @@ export function MapExplorer() {
   const [route, setRoute] = useState<ActiveRoute | null>(null)
   const [dirLoading, setDirLoading] = useState(false)
   const [courseRouting, setCourseRouting] = useState(false)
-  const [courseRouteError, setCourseRouteError] = useState(false)
+  // 코스 길찾기 실패 종류 (null=정상). notfound=경로 없음 / temporary=인증·서버 실패
+  const [courseRouteError, setCourseRouteError] = useState<DirectionsErrorKind | null>(null)
   // 출발점: 기본은 '코스 첫 집'. '내 위치'는 출발 좌표로만 쓰고 코스 항목엔 넣지 않는다.
   const [startMode, setStartMode] = useState<StartMode>('first')
   // '내 위치' 선택했으나 위치 권한이 없어 첫 집으로 폴백한 경우 안내문구 노출
@@ -108,7 +111,7 @@ export function MapExplorer() {
 
   // 코스 구성/순서·출발점이 바뀌면 그려둔 코스 경로는 낡으므로 해제 (단일 식당 경로는 유지)
   useEffect(() => {
-    setCourseRouteError(false)
+    setCourseRouteError(null)
     setStartFellBack(false)
     setRoute((r) => (r && r.destId === null ? null : r))
   }, [course.items, startMode])
@@ -165,7 +168,7 @@ export function MapExplorer() {
       .map((r) => ({ lat: r.lat, lng: r.lng }))
     if (houses.length < 2) return
     setCourseRouting(true)
-    setCourseRouteError(false)
+    setCourseRouteError(null)
     setStartFellBack(false)
 
     // 출발 좌표 결정 (내 위치 모드면 현재 위치 시도 → 실패 시 첫 집 폴백)
@@ -183,8 +186,9 @@ export function MapExplorer() {
     try {
       const { path, summary } = await fetchRouteThrough(points)
       setRoute({ destId: null, origin: points[0], path, summary })
-    } catch {
-      setCourseRouteError(true)
+    } catch (e) {
+      // 인증/서버/네트워크 실패는 '일시적', 422 만 '경로 없음'. 미상은 일시적으로 처리.
+      setCourseRouteError(e instanceof DirectionsError ? e.kind : 'temporary')
       setRoute(null)
     } finally {
       setCourseRouting(false)

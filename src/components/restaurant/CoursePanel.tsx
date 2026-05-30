@@ -5,7 +5,7 @@ import {
   primaryVerification,
   type Restaurant,
 } from '@/lib/mock/restaurants'
-import type { RouteSummary } from '@/lib/api/directions'
+import type { RouteSummary, DirectionsErrorKind } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
 
 /** 출발점 모드: 'first'=코스 첫 집(기본), 'me'=내 위치 */
@@ -24,7 +24,8 @@ interface Props {
   /** 코스 전체 길찾기 */
   routing: boolean
   routeSummary: RouteSummary | null
-  routeError: boolean
+  /** 길찾기 실패 종류 (null=정상) */
+  routeError: DirectionsErrorKind | null
   onRoute: () => void
   /** 출발점 토글 (내 위치 / 코스 첫 집) */
   startMode: StartMode
@@ -255,9 +256,14 @@ export function CoursePanel({
               위치 권한이 없어 첫 집을 출발점으로 사용합니다.
             </p>
           )}
-          {routeError && (
+          {routeError === 'notfound' && (
             <p className="text-center text-xs font-medium text-red-500">
               경로를 찾지 못했습니다. 지점이 너무 멀거나 도로가 없을 수 있어요.
+            </p>
+          )}
+          {routeError === 'temporary' && (
+            <p className="text-center text-xs font-medium text-red-500">
+              일시적인 오류로 길찾기에 실패했어요. 잠시 후 다시 시도해 주세요.
             </p>
           )}
           {capped && (

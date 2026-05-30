@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import type { Restaurant } from '@/lib/mock/restaurants'
 import type { FetchState } from '@/lib/hooks/useRestaurants'
-import type { RouteSummary } from '@/lib/api/directions'
+import type { RouteSummary, DirectionsErrorKind } from '@/lib/api/directions'
 import type { Locale } from '@/lib/i18n/display'
 import { RestaurantCard } from './RestaurantCard'
 import { RestaurantDetail } from './RestaurantDetail'
@@ -22,7 +22,8 @@ export interface CourseControls {
   /** 코스 전체 길찾기 */
   routing: boolean
   routeSummary: RouteSummary | null
-  routeError: boolean
+  /** 길찾기 실패 종류 (null=정상) */
+  routeError: DirectionsErrorKind | null
   onRoute: () => void
   /** 출발점 토글 (내 위치 / 코스 첫 집) */
   startMode: StartMode

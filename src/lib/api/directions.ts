@@ -19,6 +19,29 @@ export interface DirectionsResult {
   summary: RouteSummary
 }
 
+/**
+ * 길찾기 실패 종류.
+ *   notfound  = 진짜 경로 없음 (422: 지점이 너무 멀거나 도로 없음, 출도착 동일 등)
+ *   temporary = 인증/서버/네트워크 실패 (401/5xx 등 — 사용자 잘못 아님, 잠시 후 재시도)
+ */
+export type DirectionsErrorKind = 'notfound' | 'temporary'
+
+export class DirectionsError extends Error {
+  readonly kind: DirectionsErrorKind
+  readonly status: number
+  constructor(status: number, kind: DirectionsErrorKind) {
+    super(`directions ${status} (${kind})`)
+    this.name = 'DirectionsError'
+    this.status = status
+    this.kind = kind
+  }
+}
+
+/** HTTP 상태로 실패 종류를 분류해 던진다. 422 만 '경로 없음', 그 외는 '일시적'. */
+function throwForStatus(status: number): never {
+  throw new DirectionsError(status, status === 422 ? 'notfound' : 'temporary')
+}
+
 /** 브라우저 현재 위치 (Promise 래핑). HTTPS 또는 localhost에서만 동작. */
 export function getCurrentPosition(): Promise<LatLng> {
   return new Promise((resolve, reject) => {
@@ -42,7 +65,7 @@ export async function fetchDirections(
   const res = await fetch(
     `/api/directions?origin=${origin.lng},${origin.lat}&destination=${destination.lng},${destination.lat}`,
   )
-  if (!res.ok) throw new Error(`directions ${res.status}`)
+  if (!res.ok) throwForStatus(res.status)
   return res.json()
 }
 
@@ -62,6 +85,6 @@ export async function fetchRouteThrough(points: LatLng[]): Promise<DirectionsRes
   if (vias.length > 0) params.set('waypoints', vias.map(fmt).join('|'))
 
   const res = await fetch(`/api/directions?${params.toString()}`)
-  if (!res.ok) throw new Error(`directions ${res.status}`)
+  if (!res.ok) throwForStatus(res.status)
   return res.json()
 }
