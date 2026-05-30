@@ -23,3 +23,6 @@ next-env.d.ts
 # misc
 .DS_Store
 *.log
+
+# 일회성 백필/수집 스크립트 산출물 (카카오 API 원본 응답 등 — DB 반영 후 불필요)
+/scripts/data/
