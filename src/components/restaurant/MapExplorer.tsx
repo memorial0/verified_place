@@ -219,8 +219,11 @@ export function MapExplorer() {
     }
   }
 
+  // 미니시트 대상 — 코스 핀은 필터로 목록에서 빠질 수 있어 lookupRef 까지 폴백한다.
   const previewRestaurant = previewId
-    ? displayed.find((r) => r.id === previewId) ?? null
+    ? displayed.find((r) => r.id === previewId) ??
+      lookupRef.current.get(previewId) ??
+      null
     : null
 
   return (
@@ -293,7 +296,11 @@ export function MapExplorer() {
             selectedId={previewId ?? selectedId}
             previewId={previewId}
             route={route}
+            courseStops={courseItems}
+            startFromMe={startMode === 'me'}
+            courseRouteActive={!!route && route.destId === null}
             onPreview={handlePreview}
+            onHover={setHoverId}
             onClear={handleClear}
           />
 

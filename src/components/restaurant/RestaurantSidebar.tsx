@@ -120,6 +120,8 @@ export function RestaurantSidebar({
       onOptimize={course.onOptimize}
       optimizing={course.optimizing}
       canOptimize={course.canOptimize}
+      activeStopId={activeId}
+      onStopHover={onHover}
     />
   ) : (
     <>

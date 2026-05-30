@@ -8,6 +8,7 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import type { LatLng } from '@/lib/api/directions'
+import { haversineMeters } from '@/lib/course/order'
 import { displayName, type Locale } from '@/lib/i18n/display'
 import { REGION_CENTERS, type Region } from '@/lib/region/region'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
@@ -30,8 +31,16 @@ interface Props {
   previewId: string | null
   /** 길찾기 경로 (출발지 + 경로 좌표). 있으면 폴리라인 표시 */
   route: { origin: LatLng; path: LatLng[] } | null
+  /** 코스에 담긴 식당 (담은/정렬된 순서). 핀에 번호·출발/도착 표시 */
+  courseStops: Restaurant[]
+  /** 출발점이 '내 위치'인지 — true면 출발은 코스 항목이 아니라 현재 위치 */
+  startFromMe: boolean
+  /** 코스 전체 경로(폴리라인)가 표시 중인지 — 포커스 모드/화살표 활성 */
+  courseRouteActive: boolean
   /** 마커 클릭 → 미니시트 미리보기 */
   onPreview: (id: string | null) => void
+  /** 코스 핀 hover → 활성 정류지 공유 (목록↔지도 상호 강조). null=해제 */
+  onHover: (id: string | null) => void
   /** 빈 지도 클릭/팝업 닫기 → 선택 해제 */
   onClear: () => void
 }
@@ -44,7 +53,11 @@ export function RestaurantMap({
   selectedId,
   previewId,
   route,
+  courseStops,
+  startFromMe,
+  courseRouteActive,
   onPreview,
+  onHover,
   onClear,
 }: Props) {
   const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID ?? ''
@@ -54,8 +67,10 @@ export function RestaurantMap({
 
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
-  const polylineRef = useRef<any>(null)
+  const polylinesRef = useRef<any[]>([])
   const [mapReady, setMapReady] = useState(false)
+  // 포커스 모드 임시 해제 — '전체 보기' 토글로 흐림을 잠깐 풀 수 있다
+  const [showAll, setShowAll] = useState(false)
 
   // 빈 지도 클릭 시 선택 해제 — 리스너 안에서 항상 최신 onClear 를 쓰도록 ref 경유
   const onClearRef = useRef(onClear)
@@ -99,31 +114,54 @@ export function RestaurantMap({
     mapRef.current.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 })
   }, [route, naver])
 
-  // 경로 폴리라인 (route 변할 때마다 교체)
+  // 경로 폴리라인 (route 변할 때마다 교체).
+  // 가독성: 어두운 외곽선(굵게) 위에 밝은 안쪽선(얇게)을 겹치는 casing 처리 +
+  // zIndex 를 높여 다른 오버레이/도로 위로 또렷하게 띄운다.
   useEffect(() => {
     if (!mapRef.current || !naver) return
-    if (polylineRef.current) {
-      polylineRef.current.setMap(null)
-      polylineRef.current = null
+    const clear = () => {
+      polylinesRef.current.forEach((pl) => pl.setMap(null))
+      polylinesRef.current = []
     }
+    clear()
     if (!route || route.path.length === 0) return
-    polylineRef.current = new naver.maps.Polyline({
+    const path = route.path.map((p) => new naver.maps.LatLng(p.lat, p.lng))
+    const common = {
       map: mapRef.current,
-      path: route.path.map((p) => new naver.maps.LatLng(p.lat, p.lng)),
-      strokeColor: '#C4002B',
-      strokeWeight: 5,
-      strokeOpacity: 0.85,
-      strokeStyle: 'solid',
-    })
-    return () => {
-      if (polylineRef.current) {
-        polylineRef.current.setMap(null)
-        polylineRef.current = null
-      }
+      path,
+      strokeStyle: 'solid' as const,
+      strokeLineCap: 'round' as const,
+      strokeLineJoin: 'round' as const,
     }
+    const casing = new naver.maps.Polyline({
+      ...common,
+      strokeColor: '#5B0016', // 어두운 외곽
+      strokeWeight: 9,
+      strokeOpacity: 0.9,
+      zIndex: 100,
+    })
+    const inner = new naver.maps.Polyline({
+      ...common,
+      strokeColor: '#FF274B', // 밝은 안쪽
+      strokeWeight: 5,
+      strokeOpacity: 1,
+      zIndex: 101,
+    })
+    polylinesRef.current = [casing, inner]
+    return clear
   }, [route, naver])
 
   const active = restaurants.find((r) => r.id === activeId) ?? null
+
+  // 코스 순서 번호 — 사이드바와 동일한 배열 순서라 항상 1:1 동기화된다.
+  const courseSeq = new Map(courseStops.map((s, i) => [s.id, i + 1]))
+  const courseN = courseStops.length
+  // '코스만 보기'(경로 표시 중 기본) — 코스 밖 마커는 아예 숨긴다. showAll 토글로 전체 표시.
+  const courseOnly = courseRouteActive && !showAll
+  // 진행 방향 화살표 지점 (경로 path 를 일정 간격으로 샘플링)
+  const arrows = route ? arrowPoints(route.path) : []
+  // '출발' 배지: 코스 첫 집 출발이면 1번 코스 핀이 출발 역할 → 중복 배지는 숨긴다.
+  const showOriginBadge = !!route && !(courseRouteActive && !startFromMe)
 
   if (error) {
     return <MapLoadError clientId={clientId} />
@@ -139,23 +177,75 @@ export function RestaurantMap({
         </Centered>
       )}
 
+      {/* 포커스 모드 토글 — 경로 표시 중 코스 밖 마커를 보였다/숨겼다 */}
+      {mapReady && courseRouteActive && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="absolute right-3 top-3 z-10 rounded-full border border-gray-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-gray-700 shadow-md backdrop-blur transition-colors hover:bg-white"
+        >
+          {showAll ? '🎯 코스만 보기' : '👁 전체 보기'}
+        </button>
+      )}
+
       {mapReady && naver && (
         <>
-          {/* 인증 색상별로 차등화된 커스텀 마커 */}
-          {restaurants.map((r) => (
+          {/* 일반 마커 — 코스 항목은 아래 코스 핀으로 따로 그린다.
+              '코스만 보기'에선 코스 밖 마커를 렌더하지 않는다(완전 숨김). */}
+          {!courseOnly &&
+            restaurants
+              .filter((r) => !courseSeq.has(r.id))
+              .map((r) => (
+                <MapOverlay
+                  key={r.id}
+                  map={mapRef.current}
+                  naver={naver}
+                  position={{ lat: r.lat, lng: r.lng }}
+                  yAnchor={1}
+                  zIndex={activeId === r.id ? 40 : 10}
+                >
+                  <MarkerPin
+                    restaurant={r}
+                    locale={locale}
+                    active={activeId === r.id}
+                    onClick={() => onPreview(r.id)}
+                  />
+                </MapOverlay>
+              ))}
+
+          {/* 진행 방향 화살표 (셰브론) — 폴리라인 위, 코스 핀 아래 */}
+          {arrows.map((a, i) => (
             <MapOverlay
-              key={r.id}
+              key={`arrow-${i}`}
               map={mapRef.current}
               naver={naver}
-              position={{ lat: r.lat, lng: r.lng }}
-              yAnchor={1}
-              zIndex={activeId === r.id ? 40 : 10}
+              position={{ lat: a.lat, lng: a.lng }}
+              xAnchor={0.5}
+              yAnchor={0.5}
+              zIndex={30}
             >
-              <MarkerPin
-                restaurant={r}
-                locale={locale}
-                active={activeId === r.id}
-                onClick={() => onPreview(r.id)}
+              <ArrowChevron bearing={a.bearing} />
+            </MapOverlay>
+          ))}
+
+          {/* 코스 핀 — 경로(폴리라인)와 무관하게 courseStops 만으로 렌더한다.
+              경로 실패로 route=null 이 돼도 번호·출발/도착 핀은 그대로 남는다. */}
+          {courseStops.map((s, i) => (
+            <MapOverlay
+              key={`course-${s.id}`}
+              map={mapRef.current}
+              naver={naver}
+              position={{ lat: s.lat, lng: s.lng }}
+              yAnchor={1}
+              zIndex={activeId === s.id ? 44 : 38}
+            >
+              <CoursePin
+                seq={i + 1}
+                role={courseRoleFor(i, courseN, startFromMe)}
+                active={activeId === s.id}
+                onClick={() => onPreview(s.id)}
+                onHover={onHover}
+                id={s.id}
               />
             </MapOverlay>
           ))}
@@ -173,16 +263,19 @@ export function RestaurantMap({
             </MapOverlay>
           )}
 
-          {route && (
+          {showOriginBadge && route && (
             <MapOverlay
               map={mapRef.current}
               naver={naver}
               position={route.origin}
               yAnchor={1.4}
-              zIndex={45}
+              zIndex={46}
             >
-              <div className="rounded-full bg-gray-900 px-2 py-1 text-xs font-bold text-white shadow-md">
-                출발
+              <div className="flex flex-col items-center">
+                <div className="rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-md ring-2 ring-white">
+                  출발{startFromMe ? ' · 내 위치' : ''}
+                </div>
+                <span className="-mt-0.5 h-2.5 w-2.5 rotate-45 rounded-sm bg-emerald-600 ring-2 ring-white" />
               </div>
             </MapOverlay>
           )}
@@ -190,6 +283,14 @@ export function RestaurantMap({
       )}
     </div>
   )
+}
+
+/** 코스 핀 역할 — 출발(첫 집, 내 위치 모드 아님) / 도착(마지막) / 경유(중간) */
+type CourseRole = 'start' | 'finish' | 'mid'
+function courseRoleFor(i: number, n: number, startFromMe: boolean): CourseRole {
+  if (n >= 2 && i === n - 1) return 'finish'
+  if (i === 0 && !startFromMe) return 'start'
+  return 'mid'
 }
 
 /**
@@ -286,6 +387,129 @@ function MarkerPin({
       />
     </button>
   )
+}
+
+/**
+ * 코스 핀 — 순서 번호를 핀에 박고, 출발(초록)/도착(빨강)/경유(짙은 회색)를 색으로 구분.
+ * 번호는 사이드바의 i+1 과 같은 배열 순서라 항상 일치한다.
+ */
+function CoursePin({
+  id,
+  seq,
+  role,
+  active,
+  onClick,
+  onHover,
+}: {
+  id: string
+  seq: number
+  role: CourseRole
+  active: boolean
+  onClick: () => void
+  onHover: (id: string | null) => void
+}) {
+  const palette: Record<CourseRole, { bg: string; label: string | null }> = {
+    start: { bg: '#059669', label: '출발' },
+    finish: { bg: '#C4002B', label: '도착' },
+    mid: { bg: '#1f2937', label: null },
+  }
+  const { bg, label } = palette[role]
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick()
+      }}
+      onMouseEnter={() => onHover(id)}
+      onMouseLeave={() => onHover(null)}
+      aria-label={`코스 ${seq}번${label ? ` (${label})` : ''}`}
+      className="flex flex-col items-center"
+    >
+      {label && (
+        <span
+          className="mb-0.5 rounded-full px-1.5 py-px text-[10px] font-extrabold text-white shadow ring-1 ring-white/60"
+          style={{ backgroundColor: bg }}
+        >
+          {label}
+        </span>
+      )}
+      <span
+        className={`flex items-center justify-center rounded-full font-extrabold text-white shadow-md ring-2 transition-transform ${
+          active ? 'h-9 w-9 scale-110 text-base ring-amber-300' : 'h-7 w-7 text-sm ring-white'
+        }`}
+        style={{ backgroundColor: bg }}
+      >
+        {seq}
+      </span>
+      <span
+        className="-mt-1 h-3 w-3 rotate-45 rounded-sm ring-2 ring-white"
+        style={{ backgroundColor: bg }}
+      />
+    </button>
+  )
+}
+
+/** 진행 방향 셰브론 — 위(북)를 가리키는 화살표를 방위각만큼 회전. */
+function ArrowChevron({ bearing }: { bearing: number }) {
+  return (
+    <div style={{ transform: `rotate(${bearing}deg)` }} className="drop-shadow">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+        {/* 북쪽(위)을 향하는 화살촉. 흰 외곽 + 짙은 빨강 채움 → 선 위에서 또렷 */}
+        <path
+          d="M8 1 L14 13 L8 10 L2 13 Z"
+          fill="#5B0016"
+          stroke="#ffffff"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  )
+}
+
+/** 두 좌표의 방위각(도, 북=0 시계방향). 세그먼트 진행 방향 표시에 사용. */
+function bearingDeg(a: LatLng, b: LatLng): number {
+  const toRad = (d: number) => (d * Math.PI) / 180
+  const φ1 = toRad(a.lat)
+  const φ2 = toRad(b.lat)
+  const dλ = toRad(b.lng - a.lng)
+  const y = Math.sin(dλ) * Math.cos(φ2)
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(dλ)
+  return (Math.atan2(y, x) * 180) / Math.PI
+}
+
+/**
+ * 경로 path 를 따라 대략 균등 간격으로 화살표 지점을 고른다.
+ * 총거리(haversine 누적) 기준으로 3~8개 정도만 — 너무 촘촘하지 않게.
+ */
+function arrowPoints(path: LatLng[]): { lat: number; lng: number; bearing: number }[] {
+  if (path.length < 2) return []
+  const seg: number[] = []
+  let total = 0
+  for (let i = 1; i < path.length; i++) {
+    const d = haversineMeters(path[i - 1], path[i])
+    seg.push(d)
+    total += d
+  }
+  if (total === 0) return []
+  const count = Math.min(8, Math.max(3, Math.round(total / 1200)))
+  const step = total / (count + 1)
+  const out: { lat: number; lng: number; bearing: number }[] = []
+  let acc = 0
+  let target = step
+  for (let i = 1; i < path.length && out.length < count; i++) {
+    acc += seg[i - 1]
+    while (acc >= target && out.length < count) {
+      out.push({
+        lat: path[i].lat,
+        lng: path[i].lng,
+        bearing: bearingDeg(path[i - 1], path[i]),
+      })
+      target += step
+    }
+  }
+  return out
 }
 
 /**

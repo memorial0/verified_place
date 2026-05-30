@@ -39,6 +39,10 @@ interface Props {
   optimizing: boolean
   /** 최적화 가능 여부 (집 3곳 이상) */
   canOptimize: boolean
+  /** 활성 정류지 id — 지도 핀과 공유. 이 항목을 강조한다 */
+  activeStopId: string | null
+  /** 항목 hover → 활성 정류지 공유 (목록↔지도 상호 강조). null=해제 */
+  onStopHover: (id: string | null) => void
 }
 
 const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`)
@@ -68,6 +72,8 @@ export function CoursePanel({
   onOptimize,
   optimizing,
   canOptimize,
+  activeStopId,
+  onStopHover,
 }: Props) {
   const capped = items.length > maxHouses
   return (
@@ -114,10 +120,17 @@ export function CoursePanel({
           items.map((r, i) => {
             const primary = primaryVerification(r)
             const accent = primary ? getVerificationMeta(primary.code).color : '#111827'
+            const activeStop = activeStopId === r.id
             return (
               <div
                 key={r.id}
-                className="flex items-center gap-2 rounded-xl border border-gray-100 bg-white p-2.5"
+                onMouseEnter={() => onStopHover(r.id)}
+                onMouseLeave={() => onStopHover(null)}
+                className={`flex items-center gap-2 rounded-xl border bg-white p-2.5 transition-colors ${
+                  activeStop
+                    ? 'border-amber-300 bg-amber-50 ring-1 ring-amber-300'
+                    : 'border-gray-100'
+                }`}
               >
                 <span
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
@@ -215,9 +228,12 @@ export function CoursePanel({
           )}
 
           {routeSummary && (
-            <div className="rounded-lg bg-gray-50 px-2 py-1.5 text-center text-xs font-semibold text-gray-700">
-              <div className="flex items-center justify-center gap-2">
-                <span aria-hidden>🚗</span>
+            <div className="rounded-lg bg-gray-50 px-2 py-2 text-center text-xs font-semibold text-gray-700">
+              {/* 이동수단 명시 — 거리·시간·요금이 '자동차' 기준임을 눈에 띄게 */}
+              <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
+                🚗 자동차 기준
+              </span>
+              <div className="flex items-center justify-center gap-2 text-sm">
                 <span>코스 전체 {fmtDist(routeSummary.distance)}</span>
                 <span className="text-gray-300">·</span>
                 <span>{fmtDur(routeSummary.duration)}</span>
@@ -230,7 +246,7 @@ export function CoursePanel({
                 </div>
               )}
               <div className="mt-0.5 text-[10px] font-medium text-gray-300">
-                자동차 기준 (실시간 최적 경로)
+                실시간 최적 경로
               </div>
             </div>
           )}
