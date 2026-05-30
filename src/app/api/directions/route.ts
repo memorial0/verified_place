@@ -21,9 +21,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'origin/destination 필요' }, { status: 400 })
   }
 
-  // JS SDK 와 동일한 NCP Maps 애플리케이션 자격증명 (Client ID + Secret) — 서버에서만 읽는다
-  const keyId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID
-  const keySecret = process.env.NAVER_CLIENT_SECRET
+  // JS SDK 와 동일한 NCP Maps 애플리케이션 자격증명 (Client ID + Secret) — 서버에서만 읽는다.
+  // .trim(): 배포 대시보드(예: Cloudflare Pages)에 값을 붙여넣을 때 섞이는 끝 공백/개행을
+  // 제거한다. 보이지 않는 개행 한 칸이 헤더에 실리면 NCP 가 401 로 거부한다(흔한 함정).
+  const keyId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID?.trim()
+  const keySecret = process.env.NAVER_CLIENT_SECRET?.trim()
   if (!keyId || !keySecret) {
     return NextResponse.json({ error: '네이버 지도 키 미설정' }, { status: 500 })
   }
@@ -48,6 +50,9 @@ export async function GET(req: NextRequest) {
     },
   })
   if (!res.ok) {
+    // 401 은 거의 자격증명 거부(주로 secret 불일치/끝 공백). keyId 는 공개값이라 로그에 남겨
+    // 배포 환경의 키 짝이 맞는지 바로 진단할 수 있게 한다 (secret 은 절대 로깅하지 않는다).
+    console.warn(`[directions] NCP ${res.status} (keyId=${keyId})`)
     return NextResponse.json({ error: `naver ${res.status}` }, { status: 502 })
   }
 
