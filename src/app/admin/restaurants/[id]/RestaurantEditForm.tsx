@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface RestaurantRow {
   id: string
@@ -43,10 +44,13 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
  * 빈 영업시간 칸은 저장 시 키 자체에서 제거 → DB JSONB 가 깔끔하게 유지된다.
  */
 export function RestaurantEditForm({ restaurant }: Props) {
+  const router = useRouter()
   const initialHours = (restaurant.business_hours ?? {}) as Record<string, unknown>
   const initStr = (k: string) =>
     typeof initialHours[k] === 'string' ? (initialHours[k] as string) : ''
 
+  const [name, setName] = useState(restaurant.name ?? '')
+  const [branchName, setBranchName] = useState(restaurant.branch_name ?? '')
   const [tagline, setTagline] = useState(restaurant.tagline ?? '')
   const [reason, setReason] = useState(restaurant.reason_to_visit ?? '')
   const [phone, setPhone] = useState(restaurant.phone ?? '')
@@ -64,9 +68,15 @@ export function RestaurantEditForm({ restaurant }: Props) {
   const [hoursNote, setHoursNote] = useState(initStr('note'))
 
   const [saving, setSaving] = useState(false)
-  const [feedback, setFeedback] = useState<{ kind: 'ok' | 'error'; msg: string } | null>(
-    null,
-  )
+  const [feedback, setFeedback] = useState<{
+    kind: 'ok' | 'warn' | 'error'
+    msg: string
+  } | null>(null)
+
+  // name 검증/경고용 파생값.
+  const trimmedName = name.trim()
+  const nameEmpty = trimmedName.length === 0
+  const nameChanged = trimmedName !== (restaurant.name ?? '')
 
   function fillAllSameAsMon() {
     setHours((h) => ({
@@ -83,6 +93,10 @@ export function RestaurantEditForm({ restaurant }: Props) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (saving) return
+    if (nameEmpty) {
+      setFeedback({ kind: 'error', msg: '이름은 비울 수 없습니다.' })
+      return
+    }
     setSaving(true)
     setFeedback(null)
 
@@ -96,6 +110,8 @@ export function RestaurantEditForm({ restaurant }: Props) {
     if (Object.keys(cleanedHours).length > 0) cleanedHours.source = 'manual'
 
     const body = {
+      name: trimmedName,
+      branch_name: branchName.trim(), // 서버가 빈 문자열 → null 처리
       tagline: tagline.trim(),
       reason_to_visit: reason.trim(),
       phone: phone.trim(),
@@ -110,11 +126,24 @@ export function RestaurantEditForm({ restaurant }: Props) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const json = (await res.json().catch(() => ({}))) as { error?: string }
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string
+        warning?: string
+        changed?: string[]
+      }
       if (!res.ok) {
         setFeedback({ kind: 'error', msg: json.error ?? `HTTP ${res.status}` })
+      } else if (json.warning) {
+        // 편집은 저장됐지만 감사 로그 기록 실패 — 콘솔 + 경고 표시.
+        console.warn('[admin edit]', json.warning)
+        setFeedback({ kind: 'warn', msg: json.warning })
+        router.refresh() // 저장은 됐으므로 서버 데이터 갱신(원본 반영 → name 경고 해제)
+      } else if (Array.isArray(json.changed) && json.changed.length === 0) {
+        // no-op: 바뀐 게 없으니 refresh 안 함.
+        setFeedback({ kind: 'ok', msg: '변경 사항 없음' })
       } else {
         setFeedback({ kind: 'ok', msg: '저장됨' })
+        router.refresh() // 원본(restaurant.name) 갱신 → 변경 경고 자동 해제
       }
     } catch (err) {
       setFeedback({ kind: 'error', msg: (err as Error).message })
@@ -125,6 +154,38 @@ export function RestaurantEditForm({ restaurant }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="mt-4 space-y-4">
+      <Field
+        label="식당 이름 (name)"
+        hint="검증·표시·외부 지도 링크의 기준이 되는 한국어 상호. 비울 수 없음."
+      >
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={200}
+          placeholder="예: 통나무집닭갈비"
+          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+        />
+        {nameEmpty ? (
+          <p className="mt-1 text-xs font-semibold text-red-500">이름은 비울 수 없습니다.</p>
+        ) : nameChanged ? (
+          <p className="mt-1 text-xs font-semibold text-amber-600">
+            ⚠️ 이름을 바꾸면 외부 지도 링크가 새 이름 기준으로 바뀝니다.
+          </p>
+        ) : null}
+      </Field>
+
+      <Field label="지점명 (branch_name, 옵션)" hint="예: 본점, 강남점. 없으면 비워 두세요.">
+        <input
+          type="text"
+          value={branchName}
+          onChange={(e) => setBranchName(e.target.value)}
+          maxLength={100}
+          placeholder="예: 본점"
+          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+        />
+      </Field>
+
       <Field
         label="한 줄 설명 (tagline)"
         hint="식당 첫인상을 한 문장으로. 사용자 카드/상세에 그대로 노출됨."
@@ -228,9 +289,15 @@ export function RestaurantEditForm({ restaurant }: Props) {
       <div className="flex items-center justify-between gap-3 pt-2">
         {feedback ? (
           <span
-            className={`text-sm font-semibold ${feedback.kind === 'ok' ? 'text-emerald-600' : 'text-red-500'}`}
+            className={`text-sm font-semibold ${
+              feedback.kind === 'ok'
+                ? 'text-emerald-600'
+                : feedback.kind === 'warn'
+                  ? 'text-amber-600'
+                  : 'text-red-500'
+            }`}
           >
-            {feedback.kind === 'ok' ? '✓ ' : '✗ '}
+            {feedback.kind === 'ok' ? '✓ ' : feedback.kind === 'warn' ? '⚠ ' : '✗ '}
             {feedback.msg}
           </span>
         ) : (
@@ -238,7 +305,7 @@ export function RestaurantEditForm({ restaurant }: Props) {
         )}
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || nameEmpty}
           className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-bold text-white transition-opacity disabled:opacity-60"
         >
           {saving ? '저장 중…' : '저장'}
