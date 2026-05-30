@@ -4,6 +4,8 @@
 //    백엔드 API 연동 시 GET /api/restaurants 응답으로 대체됩니다.
 // =============================================================================
 
+import type { OpeningHours } from '@/lib/hours/types'
+
 /** DDL의 verification_types.code 와 동일한 코드 체계 */
 export type VerificationCode =
   | 'michelin'
@@ -65,6 +67,9 @@ export interface Restaurant {
   reasonEn?: string
   reasonJa?: string
   reasonZh?: string
+
+  /** 영업시간 — Google Places 수집(opening_hours jsonb). 뱃지/주간표시에 사용. null=정보 없음. */
+  openingHours?: OpeningHours
 }
 
 /** 인증 유형별 표시 메타데이터 (라벨/이모지/브랜드 컬러) — 0001_init.sql 시드와 색상 일치 */
@@ -144,6 +149,16 @@ export const RESTAURANTS: Restaurant[] = [
       { code: 'michelin', rating: 2, awardedYear: 2024 },
       { code: 'blue_ribbon', rating: 3, awardedYear: 2024 },
     ],
+    // 브레이크타임 + 일요일 휴무 데모
+    openingHours: {
+      mon: [{ open: '11:30', close: '15:00' }, { open: '17:30', close: '22:00' }],
+      tue: [{ open: '11:30', close: '15:00' }, { open: '17:30', close: '22:00' }],
+      wed: [{ open: '11:30', close: '15:00' }, { open: '17:30', close: '22:00' }],
+      thu: [{ open: '11:30', close: '15:00' }, { open: '17:30', close: '22:00' }],
+      fri: [{ open: '11:30', close: '15:00' }, { open: '17:30', close: '22:00' }],
+      sat: [{ open: '17:30', close: '22:00' }],
+      sun: [],
+    },
   },
   {
     id: 'r2',
@@ -156,6 +171,16 @@ export const RESTAURANTS: Restaurant[] = [
     lat: 37.5598,
     lng: 126.9942,
     verifications: [{ code: 'centennial', awardedYear: 2018 }],
+    // 단일 구간 데모
+    openingHours: {
+      mon: [{ open: '10:00', close: '20:00' }],
+      tue: [{ open: '10:00', close: '20:00' }],
+      wed: [{ open: '10:00', close: '20:00' }],
+      thu: [{ open: '10:00', close: '20:00' }],
+      fri: [{ open: '10:00', close: '20:00' }],
+      sat: [{ open: '10:00', close: '20:00' }],
+      sun: [{ open: '10:00', close: '20:00' }],
+    },
   },
   {
     id: 'r3',

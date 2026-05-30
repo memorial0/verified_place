@@ -1,5 +1,6 @@
 import { type Restaurant, type VerificationCode } from '@/lib/mock/restaurants'
 import { RESTAURANT_DATASET } from '@/lib/data/restaurants'
+import type { OpeningHours } from '@/lib/hours/types'
 
 // ---- GET /api/restaurants 응답 형태 (snake_case, DB Row 기반) ----------------
 interface ApiVerification {
@@ -30,6 +31,7 @@ interface ApiRestaurant {
   keywords: string[] | null
   tagline: string | null
   reason_to_visit: string | null
+  opening_hours: OpeningHours
   category: { slug: string; name_ko: string } | null
   verifications: ApiVerification[] | null
 }
@@ -49,6 +51,7 @@ export function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     sido: r.sido ?? undefined,
     sigungu: r.sigungu ?? undefined,
     phone: r.phone ?? undefined,
+    openingHours: r.opening_hours ?? null,
     verifications: (r.verifications ?? [])
       .filter((v) => v.type?.code)
       .map((v) => ({

@@ -7,6 +7,8 @@ import type { RouteSummary } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
 import { VerificationBadge } from './VerificationBadge'
 import { VerificationMetaPanel } from './VerificationMetaPanel'
+import { OpenStatusBadge } from './OpenStatusBadge'
+import { WeeklyHours } from './WeeklyHours'
 
 interface Props {
   restaurant: Restaurant
@@ -68,6 +70,11 @@ export function RestaurantDetail({
         <h2 className="mt-0.5 text-2xl font-extrabold leading-tight text-gray-900">
           {displayName(restaurant, locale)}
         </h2>
+
+        {/* 영업 상태 뱃지 (현재시각 기준, 클라이언트 계산) */}
+        <div className="mt-2">
+          <OpenStatusBadge hours={restaurant.openingHours ?? null} />
+        </div>
 
         {/* 2) 대표 키워드 */}
         {restaurant.keywords.length > 0 && (
@@ -136,6 +143,18 @@ export function RestaurantDetail({
               {restaurant.addressRoad}
             </p>
           </div>
+        </section>
+
+        {/* 7) 영업시간 — 주간 리스트(오늘 강조). 정보 없으면 안내 문구. */}
+        <section className="mt-5">
+          <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+            영업시간
+          </h3>
+          {restaurant.openingHours ? (
+            <WeeklyHours hours={restaurant.openingHours} />
+          ) : (
+            <p className="text-sm text-gray-400">영업시간 정보 없음</p>
+          )}
         </section>
       </div>
 
