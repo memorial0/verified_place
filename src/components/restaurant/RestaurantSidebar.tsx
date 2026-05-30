@@ -7,7 +7,7 @@ import type { RouteSummary } from '@/lib/api/directions'
 import type { Locale } from '@/lib/i18n/display'
 import { RestaurantCard } from './RestaurantCard'
 import { RestaurantDetail } from './RestaurantDetail'
-import { CoursePanel } from './CoursePanel'
+import { CoursePanel, type StartMode } from './CoursePanel'
 
 /** 내 코스 패널 제어 묶음 */
 export interface CourseControls {
@@ -24,6 +24,13 @@ export interface CourseControls {
   routeSummary: RouteSummary | null
   routeError: boolean
   onRoute: () => void
+  /** 출발점 토글 (내 위치 / 코스 첫 집) */
+  startMode: StartMode
+  onStartModeChange: (mode: StartMode) => void
+  /** '내 위치' 였으나 위치 권한이 없어 첫 집으로 폴백한 경우 true */
+  startFellBack: boolean
+  /** 현재 출발점 모드에서 코스에 담을 수 있는 집 최대치 (경유지 한도) */
+  maxHouses: number
 }
 
 interface Props {
@@ -100,6 +107,10 @@ export function RestaurantSidebar({
       routeSummary={course.routeSummary}
       routeError={course.routeError}
       onRoute={course.onRoute}
+      startMode={course.startMode}
+      onStartModeChange={course.onStartModeChange}
+      startFellBack={course.startFellBack}
+      maxHouses={course.maxHouses}
     />
   ) : (
     <>

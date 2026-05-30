@@ -9,9 +9,11 @@ import {
   fetchDirections,
   fetchRouteThrough,
   getCurrentPosition,
+  MAX_WAYPOINTS,
   type DirectionsResult,
   type LatLng,
 } from '@/lib/api/directions'
+import type { StartMode } from './CoursePanel'
 import { type Locale } from '@/lib/i18n/display'
 import { filterByRegion, type Region } from '@/lib/region/region'
 import { FilterChips } from './FilterChips'
@@ -23,8 +25,13 @@ import { RestaurantMiniSheet } from './RestaurantMiniSheet'
 // destId: 단일 식당 경로면 그 id, 코스 전체 경로면 null
 type ActiveRoute = DirectionsResult & { destId: string | null; origin: LatLng }
 
-/** 네이버 경유지 한도(5) → 출발+경유5+도착 = 총 7지점 */
-const MAX_COURSE_POINTS = 7
+/**
+ * Directions 15 경유지 한도(15)로부터 코스에 담을 수 있는 집 최대치.
+ * - 코스 첫 집 출발: 집이 곧 출발·도착 → 출발1 + 경유15 + 도착1 = 17곳
+ * - 내 위치 출발:   내 위치가 출발 → 집은 경유15 + 도착1 = 16곳
+ */
+const maxCourseHouses = (mode: StartMode) =>
+  mode === 'me' ? MAX_WAYPOINTS + 1 : MAX_WAYPOINTS + 2
 
 /**
  * 지도(70%) + 사이드바 목록/상세/코스(30%) + 상단 필터를 묶는 클라이언트 컨테이너.
@@ -75,6 +82,10 @@ export function MapExplorer() {
   const [dirLoading, setDirLoading] = useState(false)
   const [courseRouting, setCourseRouting] = useState(false)
   const [courseRouteError, setCourseRouteError] = useState(false)
+  // 출발점: 기본은 '코스 첫 집'. '내 위치'는 출발 좌표로만 쓰고 코스 항목엔 넣지 않는다.
+  const [startMode, setStartMode] = useState<StartMode>('first')
+  // '내 위치' 선택했으나 위치 권한이 없어 첫 집으로 폴백한 경우 안내문구 노출
+  const [startFellBack, setStartFellBack] = useState(false)
 
   // 필터로 목록이 줄어도 코스/저장 항목을 해석할 수 있도록, 본 적 있는 식당을 누적 보관
   const lookupRef = useRef<Map<string, Restaurant>>(new Map())
@@ -93,11 +104,12 @@ export function MapExplorer() {
     if (gone(previewId)) setPreviewId(null)
   }, [displayed, selectedId, previewId])
 
-  // 코스 구성/순서가 바뀌면 그려둔 코스 경로는 낡으므로 해제 (단일 식당 경로는 유지)
+  // 코스 구성/순서·출발점이 바뀌면 그려둔 코스 경로는 낡으므로 해제 (단일 식당 경로는 유지)
   useEffect(() => {
     setCourseRouteError(false)
+    setStartFellBack(false)
     setRoute((r) => (r && r.destId === null ? null : r))
-  }, [course.items])
+  }, [course.items, startMode])
 
   // 마커 클릭 → 미니 바텀시트 미리보기
   const handlePreview = (id: string | null) => {
@@ -141,18 +153,34 @@ export function MapExplorer() {
     }
   }
 
-  // 코스 전체를 순서대로 잇는 경로 (출발=첫 식당, 도착=마지막, 중간=경유지)
+  // 코스 전체를 순서대로 잇는 경로.
+  //   - 코스 첫 집 출발: 집들이 곧 출발→경유→도착
+  //   - 내 위치 출발:   내 위치를 맨 앞에 붙이고 집들은 경유→도착 (위치는 코스 항목 아님)
+  //     위치 권한 없음/거부 시 첫 집으로 폴백하고 안내문구를 띄운다 (크래시 없이).
   const requestCourseDirections = async () => {
-    const pts = courseItems.slice(0, MAX_COURSE_POINTS).map((r) => ({
-      lat: r.lat,
-      lng: r.lng,
-    }))
-    if (pts.length < 2) return
+    const houses = courseItems
+      .slice(0, maxCourseHouses(startMode))
+      .map((r) => ({ lat: r.lat, lng: r.lng }))
+    if (houses.length < 2) return
     setCourseRouting(true)
     setCourseRouteError(false)
+    setStartFellBack(false)
+
+    // 출발 좌표 결정 (내 위치 모드면 현재 위치 시도 → 실패 시 첫 집 폴백)
+    let points = houses
+    if (startMode === 'me') {
+      try {
+        const me = await getCurrentPosition()
+        // 내 위치 + 집들. 집은 최대 maxCourseHouses('me')곳까지만 (경유15+도착1)
+        points = [me, ...houses]
+      } catch {
+        setStartFellBack(true) // 권한 거부/실패 → 첫 집 출발로 폴백
+      }
+    }
+
     try {
-      const { path, summary } = await fetchRouteThrough(pts)
-      setRoute({ destId: null, origin: pts[0], path, summary })
+      const { path, summary } = await fetchRouteThrough(points)
+      setRoute({ destId: null, origin: points[0], path, summary })
     } catch {
       setCourseRouteError(true)
       setRoute(null)
@@ -210,6 +238,10 @@ export function MapExplorer() {
             routeSummary: route && route.destId === null ? route.summary : null,
             routeError: courseRouteError,
             onRoute: requestCourseDirections,
+            startMode,
+            onStartModeChange: setStartMode,
+            startFellBack,
+            maxHouses: maxCourseHouses(startMode),
           }}
           isSaved={isSaved}
           dirLoading={dirLoading}

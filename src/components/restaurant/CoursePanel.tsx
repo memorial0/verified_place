@@ -8,8 +8,8 @@ import {
 import type { RouteSummary } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
 
-/** 네이버 경유지 한도(5) → 출발+경유5+도착 = 총 7지점 */
-const MAX_COURSE_POINTS = 7
+/** 출발점 모드: 'first'=코스 첫 집(기본), 'me'=내 위치 */
+export type StartMode = 'me' | 'first'
 
 interface Props {
   /** 코스에 담긴 식당 (담은 순서) */
@@ -26,10 +26,18 @@ interface Props {
   routeSummary: RouteSummary | null
   routeError: boolean
   onRoute: () => void
+  /** 출발점 토글 (내 위치 / 코스 첫 집) */
+  startMode: StartMode
+  onStartModeChange: (mode: StartMode) => void
+  /** '내 위치' 였으나 위치 권한이 없어 첫 집으로 폴백한 경우 true */
+  startFellBack: boolean
+  /** 현재 출발점 모드에서 코스에 담을 수 있는 집 최대치 (경유지 한도) */
+  maxHouses: number
 }
 
 const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`)
 const fmtDur = (s: number) => `${Math.round(s / 60)}분`
+const fmtWon = (n: number) => `${Math.round(n).toLocaleString('ko-KR')}원`
 
 /**
  * "내 코스" 패널. 담은 순서대로 동선을 보여주고 ↑↓ 재정렬·삭제를 지원한다.
@@ -47,8 +55,12 @@ export function CoursePanel({
   routeSummary,
   routeError,
   onRoute,
+  startMode,
+  onStartModeChange,
+  startFellBack,
+  maxHouses,
 }: Props) {
-  const capped = items.length > MAX_COURSE_POINTS
+  const capped = items.length > maxHouses
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2.5">
@@ -149,25 +161,71 @@ export function CoursePanel({
         )}
       </div>
 
-      {/* 코스 전체 길찾기 (네이버 waypoints, 최대 7지점) */}
+      {/* 코스 전체 길찾기 (네이버 Directions 15, 경유지 최대 15) */}
       {items.length >= 2 && (
-        <div className="border-t border-gray-100 p-3">
+        <div className="space-y-2 border-t border-gray-100 p-3">
+          {/* 출발점 토글 — 기본은 코스 첫 집. '내 위치'는 출발 좌표로만 쓰인다. */}
+          <div>
+            <p className="mb-1 text-[11px] font-semibold text-gray-400">출발점</p>
+            <div className="flex rounded-lg bg-gray-100 p-0.5 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => onStartModeChange('first')}
+                className={`flex-1 rounded-md py-1.5 transition-colors ${
+                  startMode === 'first'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                코스 첫 집
+              </button>
+              <button
+                type="button"
+                onClick={() => onStartModeChange('me')}
+                className={`flex-1 rounded-md py-1.5 transition-colors ${
+                  startMode === 'me'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                📍 내 위치
+              </button>
+            </div>
+          </div>
+
           {routeSummary && (
-            <div className="mb-2 flex items-center justify-center gap-2 rounded-lg bg-gray-50 py-1.5 text-xs font-semibold text-gray-700">
-              <span aria-hidden>🚗</span>
-              <span>코스 전체 {fmtDist(routeSummary.distance)}</span>
-              <span className="text-gray-300">·</span>
-              <span>{fmtDur(routeSummary.duration)}</span>
+            <div className="rounded-lg bg-gray-50 px-2 py-1.5 text-center text-xs font-semibold text-gray-700">
+              <div className="flex items-center justify-center gap-2">
+                <span aria-hidden>🚗</span>
+                <span>코스 전체 {fmtDist(routeSummary.distance)}</span>
+                <span className="text-gray-300">·</span>
+                <span>{fmtDur(routeSummary.duration)}</span>
+              </div>
+              {(routeSummary.tollFare || routeSummary.fuelPrice) && (
+                <div className="mt-0.5 text-[11px] font-medium text-gray-400">
+                  {routeSummary.tollFare ? `통행료 ${fmtWon(routeSummary.tollFare)}` : ''}
+                  {routeSummary.tollFare && routeSummary.fuelPrice ? ' · ' : ''}
+                  {routeSummary.fuelPrice ? `유류비 ${fmtWon(routeSummary.fuelPrice)}` : ''}
+                </div>
+              )}
+              <div className="mt-0.5 text-[10px] font-medium text-gray-300">
+                자동차 기준 (실시간 최적 경로)
+              </div>
             </div>
           )}
+          {startFellBack && (
+            <p className="text-center text-[11px] font-medium text-amber-600">
+              위치 권한이 없어 첫 집을 출발점으로 사용합니다.
+            </p>
+          )}
           {routeError && (
-            <p className="mb-2 text-center text-xs font-medium text-red-500">
+            <p className="text-center text-xs font-medium text-red-500">
               경로를 찾지 못했습니다. 지점이 너무 멀거나 도로가 없을 수 있어요.
             </p>
           )}
           {capped && (
-            <p className="mb-2 text-center text-[11px] text-gray-400">
-              경유지 한도로 앞 {MAX_COURSE_POINTS}곳까지만 경로를 표시합니다.
+            <p className="text-center text-[11px] text-gray-400">
+              경유지 한도로 앞 {maxHouses}곳까지만 경로를 표시합니다.
             </p>
           )}
           <button
@@ -176,7 +234,7 @@ export function CoursePanel({
             disabled={routing}
             className="w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {routing ? '경로 찾는 중…' : '🚗 코스 전체 길찾기'}
+            {routing ? '경로 찾는 중…' : '🚗 코스 전체 길찾기 (자동차)'}
           </button>
         </div>
       )}
