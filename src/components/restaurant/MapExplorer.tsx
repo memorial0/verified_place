@@ -13,6 +13,7 @@ import {
   type DirectionsResult,
   type LatLng,
 } from '@/lib/api/directions'
+import { optimizeCourseOrder, type OptimizeOptions } from '@/lib/course/order'
 import type { StartMode } from './CoursePanel'
 import { type Locale } from '@/lib/i18n/display'
 import { filterByRegion, type Region } from '@/lib/region/region'
@@ -86,6 +87,7 @@ export function MapExplorer() {
   const [startMode, setStartMode] = useState<StartMode>('first')
   // '내 위치' 선택했으나 위치 권한이 없어 첫 집으로 폴백한 경우 안내문구 노출
   const [startFellBack, setStartFellBack] = useState(false)
+  const [optimizing, setOptimizing] = useState(false)
 
   // 필터로 목록이 줄어도 코스/저장 항목을 해석할 수 있도록, 본 적 있는 식당을 누적 보관
   const lookupRef = useRef<Map<string, Restaurant>>(new Map())
@@ -189,6 +191,34 @@ export function MapExplorer() {
     }
   }
 
+  // 코스 순서 최적화 (직선거리 기준 휴리스틱, 키·네트워크 무관).
+  //   - 코스 첫 집 출발: 첫 집 고정 + 나머지를 더 짧은 동선으로 재정렬
+  //   - 내 위치 출발:   현재 위치에서 가까운 순서로 재정렬 (실패 시 첫 집 기준 폴백)
+  // 순서만 바꾸고 경로는 그리지 않는다 → 사용자가 이후 '길찾기'로 도로경로를 채운다.
+  const optimizeCourse = async () => {
+    if (courseItems.length < 3) return // 2개 이하는 순서 의미 없음
+    setOptimizing(true)
+    setStartFellBack(false)
+    try {
+      let opts: OptimizeOptions = {}
+      if (startMode === 'me') {
+        try {
+          opts = { start: await getCurrentPosition() }
+        } catch {
+          setStartFellBack(true) // 위치 실패 → 첫 집 기준으로 최적화
+        }
+      }
+      const ordered = optimizeCourseOrder(
+        courseItems,
+        (r) => ({ lat: r.lat, lng: r.lng }),
+        opts,
+      )
+      course.reorder(ordered.map((r) => r.id))
+    } finally {
+      setOptimizing(false)
+    }
+  }
+
   const previewRestaurant = previewId
     ? displayed.find((r) => r.id === previewId) ?? null
     : null
@@ -242,6 +272,9 @@ export function MapExplorer() {
             onStartModeChange: setStartMode,
             startFellBack,
             maxHouses: maxCourseHouses(startMode),
+            onOptimize: optimizeCourse,
+            optimizing,
+            canOptimize: courseItems.length >= 3,
           }}
           isSaved={isSaved}
           dirLoading={dirLoading}

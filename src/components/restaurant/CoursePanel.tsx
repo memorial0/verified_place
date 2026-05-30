@@ -33,6 +33,12 @@ interface Props {
   startFellBack: boolean
   /** 현재 출발점 모드에서 코스에 담을 수 있는 집 최대치 (경유지 한도) */
   maxHouses: number
+  /** 직선거리 기준 순서 최적화 실행 */
+  onOptimize: () => void
+  /** 최적화 진행 중 */
+  optimizing: boolean
+  /** 최적화 가능 여부 (집 3곳 이상) */
+  canOptimize: boolean
 }
 
 const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`)
@@ -59,6 +65,9 @@ export function CoursePanel({
   onStartModeChange,
   startFellBack,
   maxHouses,
+  onOptimize,
+  optimizing,
+  canOptimize,
 }: Props) {
   const capped = items.length > maxHouses
   return (
@@ -192,6 +201,18 @@ export function CoursePanel({
               </button>
             </div>
           </div>
+
+          {/* 순서 최적화 — 직선거리 기준 휴리스틱으로 동선을 다듬는다 (도로경로는 길찾기에서). */}
+          {canOptimize && (
+            <button
+              type="button"
+              onClick={onOptimize}
+              disabled={optimizing || routing}
+              className="w-full rounded-lg border border-gray-200 py-2 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
+            >
+              {optimizing ? '순서 계산 중…' : '✨ 가까운 순서로 정렬'}
+            </button>
+          )}
 
           {routeSummary && (
             <div className="rounded-lg bg-gray-50 px-2 py-1.5 text-center text-xs font-semibold text-gray-700">

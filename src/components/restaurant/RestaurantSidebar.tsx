@@ -31,6 +31,12 @@ export interface CourseControls {
   startFellBack: boolean
   /** 현재 출발점 모드에서 코스에 담을 수 있는 집 최대치 (경유지 한도) */
   maxHouses: number
+  /** 직선거리 기준 순서 최적화 실행 */
+  onOptimize: () => void
+  /** 최적화 진행 중 */
+  optimizing: boolean
+  /** 최적화 가능 여부 (집 3곳 이상) */
+  canOptimize: boolean
 }
 
 interface Props {
@@ -111,6 +117,9 @@ export function RestaurantSidebar({
       onStartModeChange={course.onStartModeChange}
       startFellBack={course.startFellBack}
       maxHouses={course.maxHouses}
+      onOptimize={course.onOptimize}
+      optimizing={course.optimizing}
+      canOptimize={course.canOptimize}
     />
   ) : (
     <>
