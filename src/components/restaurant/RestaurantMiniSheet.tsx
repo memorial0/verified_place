@@ -6,6 +6,7 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { OpenStatusBadge } from './OpenStatusBadge'
 
 interface Props {
   restaurant: Restaurant
@@ -61,8 +62,9 @@ export function RestaurantMiniSheet({
           </button>
         </div>
 
-        {/* 대표 인증 + 키워드 */}
+        {/* 대표 인증 + 키워드 + 영업 상태 */}
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <OpenStatusBadge hours={restaurant.openingHours ?? null} />
           {primary && primaryMeta && (
             <span
               className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold"
