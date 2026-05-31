@@ -9,8 +9,13 @@
 // 사전 준비: 먼저 마이그레이션 0011_opening_hours.sql 을 Supabase SQL Editor 에서 실행해 컬럼을 만들 것.
 //
 // 실행:
-//   node --env-file=.env.local scripts/apply-opening-hours.mjs            # dry-run (미리보기/카운트)
+//   node --env-file=.env.local scripts/apply-opening-hours.mjs            # dry-run (기본 파일: opening_hours_import.json)
 //   node --env-file=.env.local scripts/apply-opening-hours.mjs --apply    # 실제 반영
+//
+// 입력 파일 지정(선택): 첫 번째 비(非)플래그 인자로 다른 JSON 경로를 줄 수 있다.
+//   node --env-file=.env.local scripts/apply-opening-hours.mjs opening_hours_backfill.json          # dry-run
+//   node --env-file=.env.local scripts/apply-opening-hours.mjs opening_hours_backfill.json --apply  # 반영
+//   → 파일에 든 id 만 UPDATE 하므로 기존 180건은 건드리지 않는다.
 //
 // 연결: enrich-google-places.mjs 와 동일하게 .env.local 의 Supabase service 키 재사용.
 
@@ -31,8 +36,8 @@ for (const [name, val] of [
   }
 }
 
-const IN = 'opening_hours_import.json'
 const APPLY = process.argv.includes('--apply')
+const IN = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? 'opening_hours_import.json'
 
 if (!existsSync(IN)) {
   console.error(`✗ ${IN} 가 레포 루트에 없습니다.`)
