@@ -26,3 +26,11 @@ next-env.d.ts
 
 # 일회성 백필/수집 스크립트 산출물 (카카오 API 원본 응답 등 — DB 반영 후 불필요)
 /scripts/data/
+
+# 영업시간 수집 파이프라인 산출물 (Google Places 원본 응답·중간 산출물 — DB 반영 후 불필요)
+/opening_hours_import.json
+/opening_hours_import.csv
+/opening_hours_review.csv
+/data/google-places-raw.json
+/data/restaurants-google-hours.csv
+/data/restaurants.csv
