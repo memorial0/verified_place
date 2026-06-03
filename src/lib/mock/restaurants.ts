@@ -5,15 +5,17 @@
 // =============================================================================
 
 import type { OpeningHours } from '@/lib/hours/types'
+import {
+  VERIFICATION_META,
+  getVerificationMeta,
+  type VerificationCode,
+} from '@/lib/verifications'
 
-/** DDL의 verification_types.code 와 동일한 코드 체계 */
-export type VerificationCode =
-  | 'michelin'
-  | 'blue_ribbon'
-  | 'centennial'
-  | 'exemplary'
-  | 'good_price'
-  | 'celebrity'
+// 인증 표시 메타데이터(VERIFICATION_META/getVerificationMeta)와 코드 타입은
+// src/lib/verifications.ts 로 추출했다. 기존 import 경로 호환을 위해 여기서 재노출한다.
+// (컴포넌트 import 를 verifications.ts 로 직접 바꾸는 정리는 후속 단계.)
+export { VERIFICATION_META, getVerificationMeta }
+export type { VerificationCode }
 
 export interface Verification {
   code: VerificationCode
@@ -72,31 +74,7 @@ export interface Restaurant {
   openingHours?: OpeningHours
 }
 
-/** 인증 유형별 표시 메타데이터 (라벨/이모지/브랜드 컬러) — 0001_init.sql 시드와 색상 일치 */
-export const VERIFICATION_META: Record<
-  VerificationCode,
-  { label: string; emoji: string; color: string }
-> = {
-  michelin: { label: '미슐랭', emoji: '⭐', color: '#C4002B' },
-  blue_ribbon: { label: '블루리본', emoji: '🎀', color: '#1E40AF' },
-  centennial: { label: '백년가게', emoji: '🏅', color: '#047857' },
-  exemplary: { label: '모범음식점', emoji: '✅', color: '#0E7490' },
-  good_price: { label: '착한가격업소', emoji: '💰', color: '#EA580C' },
-  celebrity: { label: '연예인 픽', emoji: '📺', color: '#7C3AED' },
-}
-
-// ── graceful 폴백 ────────────────────────────────────────────────────────────
-// production DB 가 코드 배포보다 앞서 새 verification_type 을 시드해도 (예: 0007/0008
-// 모범음식점 사고) VERIFICATION_META[unknown] 가 undefined 가 되어 컴포넌트가 터지지
-// 않도록, 항상 아래 헬퍼를 통해 메타에 접근한다. 컴포넌트에서 VERIFICATION_META[code]
-// 를 직접 인덱싱하지 말 것.
-const FALLBACK_META = { label: '인증', emoji: '📍', color: '#6B7280' } as const
-
-export function getVerificationMeta(
-  code: string,
-): { label: string; emoji: string; color: string } {
-  return (VERIFICATION_META as Record<string, typeof FALLBACK_META>)[code] ?? FALLBACK_META
-}
+// VERIFICATION_META / getVerificationMeta 는 src/lib/verifications.ts 로 이동(상단에서 재노출).
 
 /** 인증 신뢰도/노출 우선순위 (앞쪽이 높음) — 마커 색상·대표 인증 결정에 사용 */
 export const VERIFICATION_PRIORITY: VerificationCode[] = [
