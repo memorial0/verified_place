@@ -79,14 +79,22 @@ export function RestaurantMap({
   // SDK 로드 완료 후 지도 1회 생성
   useEffect(() => {
     if (!loaded || !naver || !containerRef.current || mapRef.current) return
-    mapRef.current = new naver.maps.Map(containerRef.current, {
-      center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
-      zoom: 12,
-    })
-    naver.maps.Event.addListener(mapRef.current, 'click', () =>
-      onClearRef.current(),
-    )
-    setMapReady(true)
+    try {
+      mapRef.current = new naver.maps.Map(containerRef.current, {
+        center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+        zoom: 12,
+      })
+      naver.maps.Event.addListener(mapRef.current, 'click', () =>
+        onClearRef.current(),
+      )
+      setMapReady(true)
+    } catch (e) {
+      // 네이버 SDK 인증 실패(도메인 미등록 등) 시 내부 상태가 깨져 동기 throw 될 수 있다.
+      // 전역 콜백 navermap_authFailure → error 가 곧 set 되어 MapLoadError 로 폴백되므로,
+      // 여기서는 화면 전체 크래시만 막는다.
+      mapRef.current = null
+      console.warn('[map] 지도 초기화 실패 — 네이버 키/도메인 등록 확인:', (e as Error).message)
+    }
   }, [loaded, naver])
 
   // 선택 식당으로 부드럽게 이동
@@ -319,18 +327,29 @@ function MapOverlay({
   const overlayRef = useRef<any>(null)
 
   useEffect(() => {
-    const Overlay = getReactOverlayClass(naver)
-    const overlay = new Overlay({
-      position: new naver.maps.LatLng(position.lat, position.lng),
-      element: elRef.current!,
-      xAnchor,
-      yAnchor,
-      zIndex,
-    })
-    overlay.setMap(map)
-    overlayRef.current = overlay
+    let overlay: any = null
+    try {
+      const Overlay = getReactOverlayClass(naver)
+      overlay = new Overlay({
+        position: new naver.maps.LatLng(position.lat, position.lng),
+        element: elRef.current!,
+        xAnchor,
+        yAnchor,
+        zIndex,
+      })
+      overlay.setMap(map)
+      overlayRef.current = overlay
+    } catch (e) {
+      // 인증 실패한 SDK 에 setMap 하면 내부 null 참조로 throw → 화면 전체 크래시 방지.
+      console.warn('[map] 마커 오버레이 생성 실패:', (e as Error).message)
+      return
+    }
     return () => {
-      overlay.setMap(null)
+      try {
+        overlay.setMap(null)
+      } catch {
+        // SDK 가 이미 깨진 상태면 정리도 throw 할 수 있어 무시
+      }
       overlayRef.current = null
     }
     // 위치는 아래 effect 에서 갱신 — 생성은 map/naver 기준 1회
