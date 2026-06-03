@@ -95,7 +95,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
                 key={`${v.code}-${i}`}
                 className="inline-flex items-center gap-0.5 font-medium"
                 style={{ color: meta.color }}
-                title={meta.label}
+                title={meta.shortDesc || meta.label}
               >
                 <span aria-hidden>·</span>
                 {meta.emoji.repeat(Math.max(1, v.rating ?? 1))}
