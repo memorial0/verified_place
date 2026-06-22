@@ -10,6 +10,8 @@ import {
 import type { LatLng } from '@/lib/api/directions'
 import { haversineMeters } from '@/lib/course/order'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { t } from '@/lib/i18n/ui'
+import { categoryLabel } from '@/lib/categories'
 import { REGION_CENTERS, CHUNCHEON_VENUE_CENTER, type Region } from '@/lib/region/region'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
 import { getReactOverlayClass } from '@/lib/naver/overlay'
@@ -198,7 +200,7 @@ export function RestaurantMap({
           onClick={() => setShowAll((v) => !v)}
           className="absolute right-3 top-3 z-10 rounded-full border border-gray-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-gray-700 shadow-md backdrop-blur transition-colors hover:bg-white"
         >
-          {showAll ? '🎯 코스만 보기' : '👁 전체 보기'}
+          {showAll ? `🎯 ${t(locale, 'focusCourse')}` : `👁 ${t(locale, 'showAllMarkers')}`}
         </button>
       )}
 
@@ -257,6 +259,7 @@ export function RestaurantMap({
                 seq={i + 1}
                 role={courseRoleFor(i, courseN, startFromMe)}
                 active={activeId === s.id}
+                locale={locale}
                 onClick={() => onPreview(s.id)}
                 onHover={onHover}
                 id={s.id}
@@ -287,7 +290,7 @@ export function RestaurantMap({
             >
               <div className="flex flex-col items-center">
                 <div className="rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-md ring-2 ring-white">
-                  출발{startFromMe ? ' · 내 위치' : ''}
+                  {t(locale, 'start')}{startFromMe ? ` · ${t(locale, 'startMe')}` : ''}
                 </div>
                 <span className="-mt-0.5 h-2.5 w-2.5 rotate-45 rounded-sm bg-emerald-600 ring-2 ring-white" />
               </div>
@@ -423,6 +426,7 @@ function CoursePin({
   seq,
   role,
   active,
+  locale,
   onClick,
   onHover,
 }: {
@@ -430,12 +434,13 @@ function CoursePin({
   seq: number
   role: CourseRole
   active: boolean
+  locale: Locale
   onClick: () => void
   onHover: (id: string | null) => void
 }) {
   const palette: Record<CourseRole, { bg: string; label: string | null }> = {
-    start: { bg: '#059669', label: '출발' },
-    finish: { bg: '#C4002B', label: '도착' },
+    start: { bg: '#059669', label: t(locale, 'start') },
+    finish: { bg: '#C4002B', label: t(locale, 'finish') },
     mid: { bg: '#1f2937', label: null },
   }
   const { bg, label } = palette[role]
@@ -448,7 +453,7 @@ function CoursePin({
       }}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      aria-label={`코스 ${seq}번${label ? ` (${label})` : ''}`}
+      aria-label={`${t(locale, 'myCourse')} ${seq}${label ? ` (${label})` : ''}`}
       className="flex flex-col items-center"
     >
       {label && (
@@ -609,7 +614,7 @@ function PopupCard({
             e.stopPropagation()
             onClose()
           }}
-          aria-label="닫기"
+          aria-label={t(locale, 'close')}
           className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
         >
           ✕
@@ -624,14 +629,14 @@ function PopupCard({
                 className="inline-block rounded px-1.5 py-0.5 text-xs font-bold"
                 style={{ color: accent, backgroundColor: `${accent}14` }}
               >
-                #{k}
+                #{categoryLabel(k, locale)}
               </span>
             ))}
           </div>
         )}
-        {restaurant.tagline && (
+        {(restaurant.visitorNoteEn || restaurant.tagline) && (
           <p className="mt-1.5 text-xs leading-relaxed text-gray-500">
-            {restaurant.tagline}
+            {restaurant.visitorNoteEn || restaurant.tagline}
           </p>
         )}
       </div>

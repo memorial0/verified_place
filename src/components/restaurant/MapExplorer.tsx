@@ -21,6 +21,8 @@ import { type Locale } from '@/lib/i18n/display'
 import { t } from '@/lib/i18n/ui'
 import { filterByRegion, CHUNCHEON_VENUE_CENTER, type Region } from '@/lib/region/region'
 import { matchesAmenities, type AmenityKey } from '@/lib/amenities'
+import { verificationLabel, getVerificationMeta } from '@/lib/verifications'
+import { situationLabel, venueAreaLabel } from '@/lib/visitor'
 import { FilterChips } from './FilterChips'
 import { AmenityFilter } from './AmenityFilter'
 import { QuickActions, type QuickPreset } from './QuickActions'
@@ -57,6 +59,31 @@ const NEAR_VENUE_RADIUS = 2500
 const venueDist = (r: Restaurant) =>
   haversineMeters(CHUNCHEON_VENUE_CENTER, { lat: r.lat, lng: r.lng })
 
+/**
+ * 검색 매칭 (대소문자 무시). 대상: 식당명·카테고리·주소·외국인 설명/주의·
+ * 인증 라벨(현지어+한국어)·추천상황·지역대(원시값+현지어 라벨).
+ */
+function matchesQuery(r: Restaurant, q: string, locale: Locale): boolean {
+  const needle = q.trim().toLowerCase()
+  if (!needle) return true
+  const parts: (string | undefined | null)[] = [
+    r.name,
+    r.category,
+    r.addressRoad,
+    r.visitorNoteEn,
+    r.foodWarningEn,
+    r.recommendedSituation,
+    situationLabel(r.recommendedSituation, locale),
+    r.venueArea,
+    venueAreaLabel(r.venueArea, locale),
+    ...r.verifications.flatMap((v) => [
+      verificationLabel(v.code, locale),
+      getVerificationMeta(v.code).label,
+    ]),
+  ]
+  return parts.join('  ').toLowerCase().includes(needle)
+}
+
 export function MapExplorer({ locale }: { locale: Locale }) {
   // ─── 지역: 춘천 전용(MVP) ─────────────────────────────────────────────────
   // 전국·서울 탭은 제거. 항상 춘천만 대상으로 운영한다.
@@ -68,6 +95,9 @@ export function MapExplorer({ locale }: { locale: Locale }) {
   const [nearVenue, setNearVenue] = useState(false)
   // '전체 춘천 검색' 확장 — 기본은 visitor_ready(추천) 풀만, 켜면 춘천 전체로 확장.
   const [expandAll, setExpandAll] = useState(false)
+  // 검색어 — 기본은 visitor_ready 풀 안에서, expandAll 시 춘천 전체에서 검색.
+  const [query, setQuery] = useState('')
+  const hasQuery = query.trim().length > 0
   const { restaurants: allRestaurants, state } = useRestaurants()
 
   // 클라이언트 필터링 파이프라인 (춘천 고정):
@@ -90,9 +120,11 @@ export function MapExplorer({ locale }: { locale: Locale }) {
   const matched = verifScoped.filter(
     (r) =>
       matchesAmenities(r.amenities, amenityFilter) &&
-      (!nearVenue || venueDist(r) <= NEAR_VENUE_RADIUS),
+      (!nearVenue || venueDist(r) <= NEAR_VENUE_RADIUS) &&
+      matchesQuery(r, query, locale),
   )
-  const anyFilterActive = filter !== 'all' || amenityFilter.length > 0 || nearVenue
+  const anyFilterActive =
+    filter !== 'all' || amenityFilter.length > 0 || nearVenue || hasQuery
   // 추천 정렬: 외국인 어메니티 많은 곳 우선 → 대회장 가까운 순.
   const recommended = [...matched]
     .sort((a, b) => {
@@ -294,6 +326,34 @@ export function MapExplorer({ locale }: { locale: Locale }) {
     <div className="flex h-full flex-col">
       <div className="z-10 shrink-0 overflow-x-auto border-b border-gray-100 bg-white/80 px-4 py-2.5 backdrop-blur">
         <div className="flex flex-col gap-2.5">
+          {/* 0) 검색창 — 리스트/지도 동시 필터 */}
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden>
+              🔍
+            </span>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setHoverId(null)
+              }}
+              placeholder={t(locale, 'searchPlaceholder')}
+              aria-label={t(locale, 'searchPlaceholder')}
+              className="w-full rounded-full border border-gray-200 bg-white py-2 pl-9 pr-9 text-sm focus:border-gray-900 focus:outline-none"
+            />
+            {hasQuery && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label={t(locale, 'clear')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
           {/* 1) 대회 방문객용 빠른 선택 */}
           <QuickActions locale={locale} active={activePresets} onSelect={applyQuick} />
 
@@ -326,6 +386,7 @@ export function MapExplorer({ locale }: { locale: Locale }) {
                   setHoverId(null)
                 }}
                 restaurants={chuncheon}
+                locale={locale}
               />
             </div>
           </details>

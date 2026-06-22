@@ -5,10 +5,12 @@ import {
 } from '@/lib/mock/restaurants'
 import type { RouteSummary } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { t } from '@/lib/i18n/ui'
 import { VerificationBadge } from './VerificationBadge'
 import { AmenityBadges } from './AmenityBadges'
 import { activeAmenities } from '@/lib/amenities'
 import { situationLabel, venueAreaLabel } from '@/lib/visitor'
+import { categoryLabel } from '@/lib/categories'
 import { VerificationMetaPanel } from './VerificationMetaPanel'
 import { OpenStatusBadge } from './OpenStatusBadge'
 import { WeeklyHours } from './WeeklyHours'
@@ -25,7 +27,8 @@ interface Props {
 }
 
 const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`)
-const fmtDur = (s: number) => `${Math.round(s / 60)}분`
+const fmtDur = (s: number, locale: Locale) =>
+  `${Math.round(s / 60)}${t(locale, 'minUnit')}`
 
 /**
  * 사이드바 상세 패널. 카드(또는 마커) 클릭 시 목록 대신 표시된다.
@@ -60,13 +63,13 @@ export function RestaurantDetail({
           onClick={onBack}
           className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100"
         >
-          <span aria-hidden>←</span> 목록으로
+          <span aria-hidden>←</span> {t(locale, 'back')}
         </button>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <span className="text-xs font-medium text-gray-400">
-          {restaurant.category}
+          {categoryLabel(restaurant.category, locale)}
         </span>
 
         {/* 1) 이름 */}
@@ -88,7 +91,7 @@ export function RestaurantDetail({
                 className="rounded-full px-2.5 py-1 text-sm font-bold"
                 style={{ color: accent, backgroundColor: `${accent}14` }}
               >
-                #{k}
+                #{categoryLabel(k, locale)}
               </span>
             ))}
           </div>
@@ -107,7 +110,7 @@ export function RestaurantDetail({
             className="mt-4 rounded-xl border-l-[3px] bg-gray-50 p-3 text-sm leading-relaxed text-gray-700"
             style={{ borderColor: accent }}
           >
-            <p className="mb-1 font-bold text-gray-900">이 곳을 가야 하는 이유</p>
+            <p className="mb-1 font-bold text-gray-900">{t(locale, 'whyVisit')}</p>
             {restaurant.reason}
           </div>
         )}
@@ -139,9 +142,12 @@ export function RestaurantDetail({
               </p>
             )}
             {restaurant.foodWarningEn && (
-              <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium leading-relaxed text-amber-700">
-                ⚠️ {restaurant.foodWarningEn}
-              </p>
+              <div className="rounded-lg bg-amber-50 px-3 py-2 text-amber-700">
+                <p className="mb-0.5 text-[11px] font-bold uppercase tracking-wide">
+                  ⚠️ {t(locale, 'pleaseNote')}
+                </p>
+                <p className="text-xs font-medium leading-relaxed">{restaurant.foodWarningEn}</p>
+              </div>
             )}
           </section>
         )}
@@ -150,7 +156,7 @@ export function RestaurantDetail({
         {activeAmenities(restaurant.amenities).length > 0 && (
           <section className="mt-5">
             <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-              {locale === 'ko' ? '외국인 편의' : 'Good for visitors'}
+              {t(locale, 'goodForVisitors')}
             </h3>
             <AmenityBadges amenities={restaurant.amenities} locale={locale} variant="full" />
           </section>
@@ -159,20 +165,20 @@ export function RestaurantDetail({
         {/* 5) 인증 뱃지 + 인증별 metadata (있는 인증만) */}
         <section className="mt-5">
           <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-            인증
+            {t(locale, 'certifications')}
           </h3>
           <div className="flex flex-wrap gap-1.5">
             {restaurant.verifications.map((v, i) => (
-              <VerificationBadge key={`${v.code}-${i}`} verification={v} />
+              <VerificationBadge key={`${v.code}-${i}`} verification={v} locale={locale} />
             ))}
           </div>
-          <VerificationMetaPanel verifications={restaurant.verifications} />
+          <VerificationMetaPanel verifications={restaurant.verifications} locale={locale} />
         </section>
 
         {/* 6) 연락처 + 주소 */}
         <section className="mt-5">
           <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-            연락처
+            {t(locale, 'contact')}
           </h3>
           <div className="flex flex-col gap-1.5 text-sm text-gray-700">
             {restaurant.phone && (
@@ -185,22 +191,26 @@ export function RestaurantDetail({
                 {restaurant.phone}
               </a>
             )}
-            <p className="flex items-start gap-1.5">
-              <span aria-hidden>📍</span>
-              {restaurant.addressRoad}
-            </p>
+            {/* 주소(한국어) — 택시 기사에게 보여주도록 안내 */}
+            <div className="rounded-lg bg-gray-50 p-2.5">
+              <p className="flex items-start gap-1.5 font-medium text-gray-800">
+                <span aria-hidden>📍</span>
+                {restaurant.addressRoad}
+              </p>
+              <p className="mt-1 pl-5 text-xs text-gray-500">🚕 {t(locale, 'taxiHint')}</p>
+            </div>
           </div>
         </section>
 
         {/* 7) 영업시간 — 주간 리스트(오늘 강조). 정보 없으면 안내 문구. */}
         <section className="mt-5">
           <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-            영업시간
+            {t(locale, 'hours')}
           </h3>
           {restaurant.openingHours ? (
             <WeeklyHours hours={restaurant.openingHours} />
           ) : (
-            <p className="text-sm text-gray-400">영업시간 정보 없음</p>
+            <p className="text-sm text-gray-400">{t(locale, 'hoursNone')}</p>
           )}
         </section>
       </div>
@@ -213,11 +223,11 @@ export function RestaurantDetail({
             <span aria-hidden>🚗</span>
             <span>{fmtDist(routeSummary.distance)}</span>
             <span className="text-gray-300">·</span>
-            <span>{fmtDur(routeSummary.duration)}</span>
+            <span>{fmtDur(routeSummary.duration, locale)}</span>
             {routeSummary.taxiFare != null && (
               <>
                 <span className="text-gray-300">·</span>
-                <span>택시 {routeSummary.taxiFare.toLocaleString()}원</span>
+                <span>{t(locale, 'taxi')} ₩{routeSummary.taxiFare.toLocaleString()}</span>
               </>
             )}
           </div>
@@ -232,7 +242,7 @@ export function RestaurantDetail({
             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
             style={{ backgroundColor: accent }}
           >
-            {dirLoading ? '경로 찾는 중…' : '📍 길찾기'}
+            {dirLoading ? t(locale, 'directionsLoading') : `📍 ${t(locale, 'directions')}`}
           </button>
 
           {/* 2) ★ 저장하기 / 저장됨 → useSavedRestaurants 연결 */}
@@ -246,7 +256,7 @@ export function RestaurantDetail({
                 : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {saved ? '★ 저장됨' : '☆ 저장하기'}
+            {saved ? `★ ${t(locale, 'saved')}` : `☆ ${t(locale, 'save')}`}
           </button>
         </div>
 
@@ -257,7 +267,7 @@ export function RestaurantDetail({
           rel="noopener noreferrer"
           className="mt-2 block text-center text-xs text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline"
         >
-          대중교통·도보는 네이버 지도에서 열기 →
+          {t(locale, 'transitNote')}
         </a>
       </div>
     </div>

@@ -10,6 +10,8 @@
 //  컴포넌트/About 모두 여기서 import 한다. 컴포넌트 연결은 후속 단계에서.)
 // =============================================================================
 
+import type { Locale } from '@/lib/i18n/display'
+
 /** DDL 의 verification_types.code 와 동일한 코드 체계 */
 export type VerificationCode =
   | 'michelin'
@@ -102,6 +104,26 @@ export const VERIFICATION_META: Record<VerificationCode, VerificationMeta> = {
       '방송·SNS·인터뷰 등 미디어에서 유명인이나 분야 전문가가 추천하거나 즐겨 찾는다고 밝힌 식당입니다. 기관 인증과는 성격이 다른 큐레이션 정보이므로 다른 배지와 구분해 표시하며, 누가 추천했는지는 식당 상세에서 인물명을 함께 보여줍니다.',
     sourceUrl: null,
   },
+}
+
+// ── 인증 라벨 다국어 (배지/필터/카드 표시용) ────────────────────────────────
+// VERIFICATION_META.label 은 한국어 단일. 외국인 화면에선 로케일별 라벨이 필요해
+// 별도 i18n map 으로 둔다(미번역 식당명/주소와 달리 인증 "제도"는 번역 가능).
+// 누락 로케일은 en 폴백, 미지정 code 는 한국어 meta.label 폴백.
+export const VERIFICATION_LABEL_I18N: Record<VerificationCode, Record<Locale, string>> = {
+  michelin:    { en: 'Michelin',                    ja: 'ミシュラン',          zh: '米其林',       ko: '미슐랭' },
+  blue_ribbon: { en: 'Blue Ribbon',                 ja: 'ブルーリボン',        zh: '蓝丝带',       ko: '블루리본' },
+  centennial:  { en: 'Long-standing local restaurant', ja: '老舗ローカルレストラン', zh: '老字号本地餐厅', ko: '백년가게' },
+  exemplary:   { en: 'Certified good restaurant',   ja: '優良認定レストラン',  zh: '认证优秀餐厅', ko: '모범음식점' },
+  good_price:  { en: 'Good price restaurant',       ja: '手頃な価格の認定店',  zh: '实惠价格认证店', ko: '착한가격업소' },
+  celebrity:   { en: 'Celebrity pick',              ja: '有名人のおすすめ',    zh: '名人推荐',     ko: '연예인 픽' },
+}
+
+/** 로케일별 인증 라벨. 미지정 code/로케일은 안전 폴백. */
+export function verificationLabel(code: VerificationCode, locale: Locale): string {
+  const m = VERIFICATION_LABEL_I18N[code]
+  if (m) return m[locale] ?? m.en
+  return getVerificationMeta(code).label
 }
 
 /** About "인증 종류" 등에서 일관된 노출 순서 (신뢰도/권위 순) */

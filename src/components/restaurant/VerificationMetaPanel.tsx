@@ -3,9 +3,12 @@ import {
   type Verification,
   type VerificationCode,
 } from '@/lib/mock/restaurants'
+import { t } from '@/lib/i18n/ui'
+import type { Locale } from '@/lib/i18n/display'
 
 interface Props {
   verifications: Verification[]
+  locale: Locale
 }
 
 /**
@@ -16,9 +19,9 @@ interface Props {
  * 한 식당이 인증을 여러 개 가지면 각각의 metadata 박스를 다 보여준다.
  * (예: centennial + exemplary 동시 보유 → 백년가게 이야기 + 모범음식점 정보)
  */
-export function VerificationMetaPanel({ verifications }: Props) {
+export function VerificationMetaPanel({ verifications, locale }: Props) {
   const items = verifications
-    .map((v) => ({ v, content: renderMeta(v) }))
+    .map((v) => ({ v, content: renderMeta(v, locale) }))
     .filter((x): x is { v: Verification; content: JSX.Element } => x.content !== null)
 
   if (items.length === 0) return null
@@ -38,7 +41,7 @@ export function VerificationMetaPanel({ verifications }: Props) {
               style={{ color: meta.color }}
             >
               <span aria-hidden>{meta.emoji}</span>
-              <span>{labelOf(v.code, meta.label)}</span>
+              <span>{labelOf(v.code, meta.label, locale)}</span>
             </h4>
             {content}
           </section>
@@ -48,16 +51,16 @@ export function VerificationMetaPanel({ verifications }: Props) {
   )
 }
 
-/** 섹션 헤더 라벨 — meta.label('백년가게') 보다 더 맥락 있는 문구 사용. */
-function labelOf(code: VerificationCode, fallback: string): string {
-  if (code === 'centennial') return '백년가게 이야기'
-  if (code === 'good_price') return '착한가격 대표메뉴'
-  if (code === 'exemplary') return '모범음식점 정보'
+/** 섹션 헤더 라벨 — meta.label 보다 더 맥락 있는 문구(로케일별). */
+function labelOf(code: VerificationCode, fallback: string, locale: Locale): string {
+  if (code === 'centennial') return t(locale, 'metaCentennial')
+  if (code === 'good_price') return t(locale, 'metaGoodPrice')
+  if (code === 'exemplary') return t(locale, 'metaExemplary')
   return fallback
 }
 
 /** 인증 코드별 metadata → JSX. metadata 가 없거나 알 수 없으면 null 반환. */
-function renderMeta(v: Verification): JSX.Element | null {
+function renderMeta(v: Verification, locale: Locale): JSX.Element | null {
   if (!v.metadata) return null
 
   if (v.code === 'centennial') {
@@ -71,7 +74,7 @@ function renderMeta(v: Verification): JSX.Element | null {
     if (!menu) return null
     return (
       <p className="text-sm font-semibold text-gray-800">
-        <span className="text-gray-500">대표메뉴 — </span>
+        <span className="text-gray-500">{t(locale, 'signatureMenu')} — </span>
         {menu}
       </p>
     )
@@ -86,20 +89,20 @@ function renderMeta(v: Verification): JSX.Element | null {
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm text-gray-700">
         {menu && (
           <>
-            <dt className="text-gray-500">대표메뉴</dt>
+            <dt className="text-gray-500">{t(locale, 'signatureMenu')}</dt>
             <dd className="font-semibold text-gray-800">{menu}</dd>
           </>
         )}
         {seating && (
           <>
-            <dt className="text-gray-500">좌석</dt>
-            <dd>{seatingLabel(seating)}</dd>
+            <dt className="text-gray-500">{t(locale, 'seating')}</dt>
+            <dd>{seatingLabel(seating, locale)}</dd>
           </>
         )}
         {wheelchair === true && (
           <>
-            <dt className="text-gray-500">접근성</dt>
-            <dd>♿ 휠체어 접근 가능</dd>
+            <dt className="text-gray-500">{t(locale, 'accessibility')}</dt>
+            <dd>{t(locale, 'wheelchairOk')}</dd>
           </>
         )}
         {/* wheelchair_accessible === false 는 의도적으로 노출 생략 — 차별적 인상을 피하기 위함. */}
@@ -121,7 +124,9 @@ function boolField(m: Record<string, unknown>, key: string): boolean | null {
   return typeof v === 'boolean' ? v : null
 }
 
-function seatingLabel(raw: string): string {
-  if (raw === '둘다') return '입식·좌식 모두 가능'
-  return raw // '입식' / '좌식' — 한국어 원본 그대로
+function seatingLabel(raw: string, locale: Locale): string {
+  if (raw === '둘다') return t(locale, 'seatBoth')
+  if (raw === '입식') return t(locale, 'seatStanding')
+  if (raw === '좌식') return t(locale, 'seatFloor')
+  return raw
 }

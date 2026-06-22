@@ -140,17 +140,17 @@ export function RestaurantSidebar({
               onClick={course.open}
               className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 font-bold text-emerald-600 transition-colors hover:bg-emerald-100"
             >
-              🧭 내 코스 {course.count}
+              🧭 {t(locale, 'myCourse')} {course.count}
             </button>
           )}
         </p>
-        <SourceBadge state={state} />
+        <SourceBadge state={state} locale={locale} />
       </div>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4">
         {restaurants.length === 0 ? (
           <p className="mt-10 text-center text-sm text-gray-400">
-            조건에 맞는 식당이 없습니다.
+            {t(locale, 'noResults')}
           </p>
         ) : (
           restaurants.map((r) => (
@@ -180,16 +180,16 @@ export function RestaurantSidebar({
   )
 }
 
-function SourceBadge({ state }: { state: FetchState }) {
+function SourceBadge({ state, locale }: { state: FetchState; locale: Locale }) {
   const map = {
-    loading: { label: '불러오는 중', cls: 'bg-gray-100 text-gray-400' },
-    live: { label: '● 실시간', cls: 'bg-emerald-50 text-emerald-600' },
-    fallback: { label: '● 데모 데이터', cls: 'bg-amber-50 text-amber-600' },
+    loading: { key: 'sourceLoading', cls: 'bg-gray-100 text-gray-400' },
+    live: { key: 'sourceLive', cls: 'bg-emerald-50 text-emerald-600' },
+    fallback: { key: 'sourceDemo', cls: 'bg-amber-50 text-amber-600' },
   } as const
-  const { label, cls } = map[state]
+  const { key, cls } = map[state]
   return (
     <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${cls}`}>
-      {label}
+      {t(locale, key)}
     </span>
   )
 }

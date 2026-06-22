@@ -7,6 +7,7 @@ import {
 } from '@/lib/mock/restaurants'
 import type { RouteSummary, DirectionsErrorKind } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { t } from '@/lib/i18n/ui'
 
 /** 출발점 모드: 'first'=코스 첫 집(기본), 'me'=내 위치 */
 export type StartMode = 'me' | 'first'
@@ -47,8 +48,9 @@ interface Props {
 }
 
 const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`)
-const fmtDur = (s: number) => `${Math.round(s / 60)}분`
-const fmtWon = (n: number) => `${Math.round(n).toLocaleString('ko-KR')}원`
+const fmtDur = (s: number, locale: Locale) =>
+  `${Math.round(s / 60)}${t(locale, 'minUnit')}`
+const fmtWon = (n: number) => `₩${Math.round(n).toLocaleString('en-US')}`
 
 /**
  * "내 코스" 패널. 담은 순서대로 동선을 보여주고 ↑↓ 재정렬·삭제를 지원한다.
@@ -85,7 +87,7 @@ export function CoursePanel({
           onClick={onBack}
           className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100"
         >
-          <span aria-hidden>←</span> 목록으로
+          <span aria-hidden>←</span> {t(locale, 'back')}
         </button>
         {items.length > 0 && (
           <button
@@ -93,29 +95,24 @@ export function CoursePanel({
             onClick={onClear}
             className="rounded-lg px-2 py-1 text-xs font-semibold text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
           >
-            전체 비우기
+            {t(locale, 'courseClearAll')}
           </button>
         )}
       </div>
 
       <div className="px-4 pb-1 pt-3">
         <h2 className="text-lg font-extrabold text-gray-900">
-          🧭 내 코스 <span className="text-emerald-600">{items.length}곳</span>
+          🧭 {t(locale, 'myCourse')} <span className="text-emerald-600">{items.length}</span>
         </h2>
-        <p className="mt-0.5 text-xs text-gray-400">
-          담은 순서가 동선이 됩니다. ↑↓로 순서를 바꿔보세요.
-        </p>
+        <p className="mt-0.5 text-xs text-gray-400">{t(locale, 'courseOrderHint')}</p>
       </div>
 
       <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {items.length === 0 ? (
           <p className="mt-10 text-center text-sm leading-relaxed text-gray-400">
-            코스가 비어 있습니다.
+            {t(locale, 'courseEmpty')}
             <br />
-            지도 마커를 눌러 <span className="font-semibold text-emerald-600">
-              🧭 코스에 추가
-            </span>
-            해 보세요.
+            {t(locale, 'courseEmptyHint')}
           </p>
         ) : (
           items.map((r, i) => {
@@ -154,7 +151,7 @@ export function CoursePanel({
                     type="button"
                     onClick={() => onMove(i, i - 1)}
                     disabled={i === 0}
-                    aria-label="위로"
+                    aria-label={t(locale, 'moveUp')}
                     className="px-1 leading-none transition-colors hover:text-gray-700 disabled:opacity-25"
                   >
                     ▲
@@ -163,7 +160,7 @@ export function CoursePanel({
                     type="button"
                     onClick={() => onMove(i, i + 1)}
                     disabled={i === items.length - 1}
-                    aria-label="아래로"
+                    aria-label={t(locale, 'moveDown')}
                     className="px-1 leading-none transition-colors hover:text-gray-700 disabled:opacity-25"
                   >
                     ▼
@@ -173,7 +170,7 @@ export function CoursePanel({
                 <button
                   type="button"
                   onClick={() => onRemove(r.id)}
-                  aria-label="코스에서 삭제"
+                  aria-label={t(locale, 'removeFromCourse')}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
                 >
                   ✕
@@ -189,7 +186,7 @@ export function CoursePanel({
         <div className="space-y-2 border-t border-gray-100 p-3">
           {/* 출발점 토글 — 기본은 코스 첫 집. '내 위치'는 출발 좌표로만 쓰인다. */}
           <div>
-            <p className="mb-1 text-[11px] font-semibold text-gray-400">출발점</p>
+            <p className="mb-1 text-[11px] font-semibold text-gray-400">{t(locale, 'startPoint')}</p>
             <div className="flex rounded-lg bg-gray-100 p-0.5 text-xs font-bold">
               <button
                 type="button"
@@ -200,7 +197,7 @@ export function CoursePanel({
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
-                코스 첫 집
+                {t(locale, 'startFirst')}
               </button>
               <button
                 type="button"
@@ -211,7 +208,7 @@ export function CoursePanel({
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
-                📍 내 위치
+                📍 {t(locale, 'startMe')}
               </button>
             </div>
           </div>
@@ -224,7 +221,7 @@ export function CoursePanel({
               disabled={optimizing || routing}
               className="w-full rounded-lg border border-gray-200 py-2 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
             >
-              {optimizing ? '순서 계산 중…' : '✨ 가까운 순서로 정렬'}
+              {optimizing ? t(locale, 'optimizing') : `✨ ${t(locale, 'optimizeOrder')}`}
             </button>
           )}
 
@@ -232,43 +229,43 @@ export function CoursePanel({
             <div className="rounded-lg bg-gray-50 px-2 py-2 text-center text-xs font-semibold text-gray-700">
               {/* 이동수단 명시 — 거리·시간·요금이 '자동차' 기준임을 눈에 띄게 */}
               <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-white">
-                🚗 자동차 기준
+                🚗 {t(locale, 'carBasis')}
               </span>
               <div className="flex items-center justify-center gap-2 text-sm">
-                <span>코스 전체 {fmtDist(routeSummary.distance)}</span>
+                <span>{t(locale, 'courseTotal')} {fmtDist(routeSummary.distance)}</span>
                 <span className="text-gray-300">·</span>
-                <span>{fmtDur(routeSummary.duration)}</span>
+                <span>{fmtDur(routeSummary.duration, locale)}</span>
               </div>
               {(routeSummary.tollFare || routeSummary.fuelPrice) && (
                 <div className="mt-0.5 text-[11px] font-medium text-gray-400">
-                  {routeSummary.tollFare ? `통행료 ${fmtWon(routeSummary.tollFare)}` : ''}
+                  {routeSummary.tollFare ? `${t(locale, 'toll')} ${fmtWon(routeSummary.tollFare)}` : ''}
                   {routeSummary.tollFare && routeSummary.fuelPrice ? ' · ' : ''}
-                  {routeSummary.fuelPrice ? `유류비 ${fmtWon(routeSummary.fuelPrice)}` : ''}
+                  {routeSummary.fuelPrice ? `${t(locale, 'fuel')} ${fmtWon(routeSummary.fuelPrice)}` : ''}
                 </div>
               )}
               <div className="mt-0.5 text-[10px] font-medium text-gray-300">
-                실시간 최적 경로
+                {t(locale, 'realtimeRoute')}
               </div>
             </div>
           )}
           {startFellBack && (
             <p className="text-center text-[11px] font-medium text-amber-600">
-              위치 권한이 없어 첫 집을 출발점으로 사용합니다.
+              {t(locale, 'startFellBack')}
             </p>
           )}
           {routeError === 'notfound' && (
             <p className="text-center text-xs font-medium text-red-500">
-              경로를 찾지 못했습니다. 지점이 너무 멀거나 도로가 없을 수 있어요.
+              {t(locale, 'routeNotFound')}
             </p>
           )}
           {routeError === 'temporary' && (
             <p className="text-center text-xs font-medium text-red-500">
-              일시적인 오류로 길찾기에 실패했어요. 잠시 후 다시 시도해 주세요.
+              {t(locale, 'routeTempError')}
             </p>
           )}
           {capped && (
             <p className="text-center text-[11px] text-gray-400">
-              경유지 한도로 앞 {maxHouses}곳까지만 경로를 표시합니다.
+              {t(locale, 'waypointLimit').replace('{n}', String(maxHouses))}
             </p>
           )}
           <button
@@ -277,7 +274,7 @@ export function CoursePanel({
             disabled={routing}
             className="w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {routing ? '경로 찾는 중…' : '🚗 코스 전체 길찾기 (자동차)'}
+            {routing ? t(locale, 'directionsLoading') : `🚗 ${t(locale, 'courseRouteCta')}`}
           </button>
         </div>
       )}

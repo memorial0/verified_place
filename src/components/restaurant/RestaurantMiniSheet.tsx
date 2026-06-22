@@ -6,6 +6,9 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { t } from '@/lib/i18n/ui'
+import { verificationLabel } from '@/lib/verifications'
+import { categoryLabel } from '@/lib/categories'
 import { OpenStatusBadge } from './OpenStatusBadge'
 
 interface Props {
@@ -46,7 +49,7 @@ export function RestaurantMiniSheet({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <span className="text-xs font-medium text-gray-400">
-              {restaurant.category}
+              {categoryLabel(restaurant.category, locale)}
             </span>
             <h3 className="truncate text-lg font-extrabold leading-snug text-gray-900">
               {displayName(restaurant, locale)}
@@ -55,7 +58,7 @@ export function RestaurantMiniSheet({
           <button
             type="button"
             onClick={onClose}
-            aria-label="닫기"
+            aria-label={t(locale, 'close')}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
           >
             ✕
@@ -71,7 +74,7 @@ export function RestaurantMiniSheet({
               style={{ color: accent, backgroundColor: `${accent}14` }}
             >
               {primaryMeta.emoji.repeat(Math.max(1, primary.rating ?? 1))}
-              {primaryMeta.label}
+              {verificationLabel(primary.code, locale)}
             </span>
           )}
           {restaurant.keywords.slice(0, 2).map((k) => (
@@ -79,7 +82,7 @@ export function RestaurantMiniSheet({
               key={k}
               className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500"
             >
-              #{k}
+              #{categoryLabel(k, locale)}
             </span>
           ))}
         </div>
@@ -93,14 +96,14 @@ export function RestaurantMiniSheet({
             className="flex flex-1 items-center justify-center gap-1 rounded-xl py-2.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
             style={{ backgroundColor: accent }}
           >
-            {dirLoading ? '경로…' : '📍 길찾기'}
+            {dirLoading ? t(locale, 'directionsLoading') : `📍 ${t(locale, 'directions')}`}
           </button>
           <button
             type="button"
             onClick={() => onDetail(restaurant.id)}
             className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50"
           >
-            📄 상세보기
+            📄 {t(locale, 'detailView')}
           </button>
           <button
             type="button"
@@ -112,7 +115,7 @@ export function RestaurantMiniSheet({
                 : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {inCourse ? '🧭 코스에 담김' : '🧭 코스에 추가'}
+            {inCourse ? `🧭 ${t(locale, 'inCourse')}` : `🧭 ${t(locale, 'addToCourse')}`}
           </button>
         </div>
       </div>

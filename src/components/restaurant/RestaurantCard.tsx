@@ -5,6 +5,10 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { t } from '@/lib/i18n/ui'
+import { verificationLabel } from '@/lib/verifications'
+import { situationLabel, venueAreaLabel } from '@/lib/visitor'
+import { categoryLabel } from '@/lib/categories'
 import { AmenityBadges } from './AmenityBadges'
 
 interface Props {
@@ -54,6 +58,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
         {/* 5) 저장 버튼 */}
         <SaveButton
           saved={saved}
+          label={saved ? t(locale, 'saved') : t(locale, 'save')}
           onClick={(e) => {
             e.stopPropagation()
             onToggleSave(restaurant.id)
@@ -73,16 +78,40 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
                 key={k}
                 className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600"
               >
-                #{k}
+                #{categoryLabel(k, locale)}
               </span>
             ))}
           </div>
         )}
 
-        {/* 3) 한 줄 설명 */}
-        {restaurant.tagline && (
+        {/* 3) 설명 — 외국인용 영어 설명 우선, 없으면 한국어 한 줄 설명 */}
+        {(restaurant.visitorNoteEn || restaurant.tagline) && (
           <p className="mt-2.5 line-clamp-2 text-sm leading-relaxed text-gray-600">
-            {restaurant.tagline}
+            {restaurant.visitorNoteEn || restaurant.tagline}
+          </p>
+        )}
+
+        {/* 3.3) 지역대 / 추천 상황 태그 */}
+        {(venueAreaLabel(restaurant.venueArea, locale) ||
+          situationLabel(restaurant.recommendedSituation, locale)) && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {venueAreaLabel(restaurant.venueArea, locale) && (
+              <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+                📍 {venueAreaLabel(restaurant.venueArea, locale)}
+              </span>
+            )}
+            {situationLabel(restaurant.recommendedSituation, locale) && (
+              <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+                {situationLabel(restaurant.recommendedSituation, locale)}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* 3.4) 외국인용 주의 */}
+        {restaurant.foodWarningEn && (
+          <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-medium leading-snug text-amber-700">
+            ⚠️ {restaurant.foodWarningEn}
           </p>
         )}
 
@@ -91,7 +120,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
 
         {/* (보조) 카테고리 + 인증 — 작은 메타 라인 */}
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-gray-100 pt-2.5 text-xs text-gray-400">
-          <span>{restaurant.category}</span>
+          <span>{categoryLabel(restaurant.category, locale)}</span>
           {restaurant.verifications.map((v, i) => {
             const meta = getVerificationMeta(v.code)
             return (
@@ -103,7 +132,7 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
               >
                 <span aria-hidden>·</span>
                 {meta.emoji.repeat(Math.max(1, v.rating ?? 1))}
-                {meta.label}
+                {verificationLabel(v.code, locale)}
               </span>
             )
           })}
@@ -115,9 +144,11 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
 
 function SaveButton({
   saved,
+  label,
   onClick,
 }: {
   saved: boolean
+  label: string
   onClick: (e: React.MouseEvent) => void
 }) {
   return (
@@ -125,7 +156,7 @@ function SaveButton({
       type="button"
       onClick={onClick}
       aria-pressed={saved}
-      aria-label={saved ? '저장 취소' : '저장'}
+      aria-label={label}
       className={`absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-lg transition-all ${
         saved
           ? 'bg-amber-50 text-amber-500'

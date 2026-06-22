@@ -23,11 +23,14 @@
 alter table public.restaurants
   add column if not exists amenities jsonb not null default '{}'::jsonb;
 
--- 뷰 재생성 -------------------------------------------------------------------
+-- 뷰 재정의 -------------------------------------------------------------------
 --   restaurant_with_verifications 는 select r.* 정의라 신규 컬럼이 자동 반영되지 않는다
 --   (PostgreSQL 은 뷰 생성 시점에 r.* 를 현재 컬럼 리스트로 확정 — 0006 동일 이슈).
---   정의 본체는 0006 과 동일하게 유지하고 create or replace 로 재해석만 시킨다.
-create or replace view public.restaurant_with_verifications
+--   ⚠️ create or replace 는 컬럼 추가로 r.* 위치가 밀리면 "컬럼명 변경 불가"로 거부된다.
+--   → drop + create 로 완전히 재정의(뷰 이름·기능 동일, 신규 컬럼 자동 포함).
+--   cascade: 이 뷰에 의존하는 객체까지 정리(현재 앱은 restaurants 테이블을 직접 조회).
+drop view if exists public.restaurant_with_verifications cascade;
+create view public.restaurant_with_verifications
 with (security_invoker = on) as
 select
   r.*,
