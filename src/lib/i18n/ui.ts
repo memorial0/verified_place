@@ -103,6 +103,8 @@ export type UiKey =
   | 'showAllMarkers'
   | 'start'
   | 'finish'
+  | 'prev'
+  | 'next'
 
 const UI: Record<Locale, Record<UiKey, string>> = {
   en: {
@@ -193,6 +195,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     showAllMarkers: 'Show all',
     start: 'Start',
     finish: 'Finish',
+    prev: 'Prev',
+    next: 'Next',
   },
   ja: {
     appTitle: '春川 訪問者向け 食事ガイド',
@@ -282,6 +286,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     showAllMarkers: 'すべて表示',
     start: 'スタート',
     finish: 'ゴール',
+    prev: '前へ',
+    next: '次へ',
   },
   zh: {
     appTitle: '春川访客美食指南',
@@ -371,6 +377,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     showAllMarkers: '显示全部',
     start: '出发',
     finish: '终点',
+    prev: '上一页',
+    next: '下一页',
   },
   ko: {
     appTitle: '춘천 외국인 방문객 식사 안내',
@@ -460,6 +468,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     showAllMarkers: '전체 보기',
     start: '출발',
     finish: '도착',
+    prev: '이전',
+    next: '다음',
   },
 }
 

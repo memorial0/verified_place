@@ -41,6 +41,17 @@ export interface CourseControls {
   canOptimize: boolean
 }
 
+/** 리스트 페이지네이션 — 페이지당 20개. 지도 마커도 페이지 단위로 동기화된다. */
+interface Pagination {
+  page: number
+  pageCount: number
+  rangeStart: number
+  rangeEnd: number
+  total: number
+  onPrev: () => void
+  onNext: () => void
+}
+
 interface Props {
   restaurants: Restaurant[]
   locale: Locale
@@ -50,6 +61,7 @@ interface Props {
   state: FetchState
   savedCount: number
   course: CourseControls
+  pagination?: Pagination
   isSaved: (id: string) => boolean
   dirLoading: boolean
   routeSummary: RouteSummary | null
@@ -67,6 +79,7 @@ export function RestaurantSidebar({
   state,
   savedCount,
   course,
+  pagination,
   isSaved,
   dirLoading,
   routeSummary,
@@ -76,6 +89,12 @@ export function RestaurantSidebar({
   onDirections,
 }: Props) {
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const listRef = useRef<HTMLDivElement | null>(null)
+
+  // 페이지가 바뀌면 리스트를 맨 위로 (다음 페이지 첫 항목부터 보이도록)
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0 })
+  }, [pagination?.page])
 
   const selected = selectedId
     ? restaurants.find((r) => r.id === selectedId) ?? null
@@ -147,7 +166,7 @@ export function RestaurantSidebar({
         <SourceBadge state={state} locale={locale} />
       </div>
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4">
+      <div ref={listRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4">
         {restaurants.length === 0 ? (
           <p className="mt-10 text-center text-sm text-gray-400">
             {t(locale, 'noResults')}
@@ -170,6 +189,31 @@ export function RestaurantSidebar({
           ))
         )}
       </div>
+
+      {/* 페이지 네비게이션 — 이전/다음 (페이지당 20개) */}
+      {pagination && pagination.pageCount > 1 && (
+        <div className="flex shrink-0 items-center justify-between gap-2 border-t border-gray-100 bg-white px-4 py-2.5">
+          <button
+            type="button"
+            onClick={pagination.onPrev}
+            disabled={pagination.page === 0}
+            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40"
+          >
+            ‹ {t(locale, 'prev')}
+          </button>
+          <span className="text-xs font-medium tabular-nums text-gray-500">
+            {pagination.rangeStart}–{pagination.rangeEnd} / {pagination.total}
+          </span>
+          <button
+            type="button"
+            onClick={pagination.onNext}
+            disabled={pagination.page >= pagination.pageCount - 1}
+            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40"
+          >
+            {t(locale, 'next')} ›
+          </button>
+        </div>
+      )}
     </>
   )
 

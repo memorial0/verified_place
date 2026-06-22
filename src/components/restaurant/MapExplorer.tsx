@@ -97,8 +97,8 @@ export function MapExplorer({ locale }: { locale: Locale }) {
   const [amenityFilter, setAmenityFilter] = useState<AmenityKey[]>([])
   // '대회장 근처' 프리셋 — 송암스포츠타운 반경 내만.
   const [nearVenue, setNearVenue] = useState(false)
-  // '전체 춘천 검색' 확장 — 기본은 주변 추천 20곳, 켜면 일치 전부(20 제한 해제).
-  const [expandAll, setExpandAll] = useState(false)
+  // 페이지네이션 — 한 페이지 20개(가까운 순). 지도 마커도 페이지당 ≤20 유지.
+  const [page, setPage] = useState(0)
   // 검색어 — 춘천 전체에서 검색.
   const [query, setQuery] = useState('')
   const hasQuery = query.trim().length > 0
@@ -120,6 +120,11 @@ export function MapExplorer({ locale }: { locale: Locale }) {
     }
   }, [])
 
+  // 필터/검색이 바뀌면 1페이지로 리셋 (빈 페이지에 머무르지 않도록).
+  useEffect(() => {
+    setPage(0)
+  }, [filter, amenityFilter, nearVenue, query])
+
   // 정렬 기준 위치: 사용자 위치(춘천 인근일 때만) → 없으면 대회장 중심으로 조용히 폴백.
   const nearChuncheon =
     !!userLoc && haversineMeters(CHUNCHEON_VENUE_CENTER, userLoc) < USER_LOC_MAX_M
@@ -128,11 +133,11 @@ export function MapExplorer({ locale }: { locale: Locale }) {
     haversineMeters(rankOrigin, { lat: r.lat, lng: r.lng })
 
   // 클라이언트 필터링 파이프라인 (춘천 전체 기준):
-  //   chuncheon   → 춘천 식당 전체. 기본 풀도 전체 → visitor_ready 22곳에 갇히지 않음.
-  //   verifScoped → 인증 필터 적용. 어메니티 카운트 모수.
-  //   matched     → 어메니티 AND + 대회장 근처 + 검색까지 적용한 "조건 일치" 집합.
-  //   displayed   → 필터/검색 없으면 '주변 추천' 20곳, 있으면 일치 전부.
-  //                 지도 마커 = 사이드바 리스트 = displayed (항상 동기화).
+  //   chuncheon    → 춘천 식당 전체. 기본 풀도 전체 → visitor_ready 22곳에 갇히지 않음.
+  //   verifScoped  → 인증 필터 적용. 어메니티 카운트 모수.
+  //   matched      → 어메니티 AND + 대회장 근처 + 검색까지 적용한 "조건 일치" 집합.
+  //   sortedMatched→ 가까운 순(+visitor_ready 가산점)으로 정렬한 전체 일치 목록.
+  //   displayed    → 그 중 현재 페이지 20개. 지도 마커 = 리스트 = displayed (항상 ≤20 동기화).
   const chuncheon = filterByRegion(allRestaurants, region)
   const verifScoped =
     filter === 'all'
@@ -146,13 +151,19 @@ export function MapExplorer({ locale }: { locale: Locale }) {
   )
   const anyFilterActive =
     filter !== 'all' || amenityFilter.length > 0 || nearVenue || hasQuery
-  // 추천 정렬: 가까운 순(주변 위주) + visitor_ready 가산점(추천 식당 살짝 우대, 독점 아님).
+  // 정렬: 가까운 순(주변 위주) + visitor_ready 가산점(추천 식당 살짝 우대, 독점 아님).
   const score = (r: Restaurant) => rankDist(r) - (r.visitorReady ? VISITOR_BOOST_M : 0)
-  const recommended = [...matched]
-    .sort((a, b) => score(a) - score(b))
-    .slice(0, RECOMMENDED_LIMIT)
-  // 기본(추천)에서는 20곳 제한. 필터/검색/전체검색이면 일치 전부 표시.
-  const displayed = anyFilterActive || expandAll ? matched : recommended
+  const sortedMatched = [...matched].sort((a, b) => score(a) - score(b))
+
+  // 페이지네이션 — 페이지당 RECOMMENDED_LIMIT(20)개. 페이지는 [0, pageCount-1] 로 클램프.
+  const pageCount = Math.max(1, Math.ceil(sortedMatched.length / RECOMMENDED_LIMIT))
+  const safePage = Math.min(page, pageCount - 1)
+  const displayed = sortedMatched.slice(
+    safePage * RECOMMENDED_LIMIT,
+    safePage * RECOMMENDED_LIMIT + RECOMMENDED_LIMIT,
+  )
+  const rangeStart = sortedMatched.length === 0 ? 0 : safePage * RECOMMENDED_LIMIT + 1
+  const rangeEnd = safePage * RECOMMENDED_LIMIT + displayed.length
   const { isSaved, toggle: toggleSave, savedCount } = useSavedRestaurants()
   const course = useCourse()
 
@@ -410,27 +421,15 @@ export function MapExplorer({ locale }: { locale: Locale }) {
             </div>
           </details>
 
-          {/* 4) 현재 표시 안내 + 전체 검색 확장 토글 */}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] text-gray-500">
-              {nearVenue
-                ? t(locale, 'resultsNear')
-                : !anyFilterActive
-                  ? t(locale, nearChuncheon ? 'recommendedNearYou' : 'recommendedNote')
-                  : ''}
-              <span className="ml-1 font-bold text-gray-700">· {displayed.length}</span>
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setExpandAll((v) => !v)
-                setHoverId(null)
-              }}
-              className="shrink-0 rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-800"
-            >
-              {expandAll ? t(locale, 'pilotOnly') : `${t(locale, 'searchAll')} (${chuncheon.length})`}
-            </button>
-          </div>
+          {/* 4) 현재 표시 안내 (전체 결과 수). 페이지 이동은 리스트 하단 페이저에서. */}
+          <p className="text-[11px] text-gray-500">
+            {nearVenue
+              ? t(locale, 'resultsNear')
+              : !anyFilterActive
+                ? t(locale, nearChuncheon ? 'recommendedNearYou' : 'recommendedNote')
+                : ''}
+            <span className="ml-1 font-bold text-gray-700">· {sortedMatched.length}</span>
+          </p>
         </div>
       </div>
 
@@ -442,6 +441,21 @@ export function MapExplorer({ locale }: { locale: Locale }) {
           selectedId={selectedId}
           state={state}
           savedCount={savedCount}
+          pagination={{
+            page: safePage,
+            pageCount,
+            rangeStart,
+            rangeEnd,
+            total: sortedMatched.length,
+            onPrev: () => {
+              setPage((p) => Math.max(0, p - 1))
+              setHoverId(null)
+            },
+            onNext: () => {
+              setPage((p) => Math.min(pageCount - 1, p + 1))
+              setHoverId(null)
+            },
+          }}
           course={{
             count: course.count,
             show: showCourse,
