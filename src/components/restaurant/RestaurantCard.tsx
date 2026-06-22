@@ -5,6 +5,7 @@ import {
   type Restaurant,
 } from '@/lib/mock/restaurants'
 import { displayName, type Locale } from '@/lib/i18n/display'
+import { AmenityBadges } from './AmenityBadges'
 
 interface Props {
   restaurant: Restaurant
@@ -84,6 +85,9 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
             {restaurant.tagline}
           </p>
         )}
+
+        {/* 3.5) 외국인 어메니티 (보유한 것만, 아이콘) */}
+        <AmenityBadges amenities={restaurant.amenities} locale={locale} variant="compact" />
 
         {/* (보조) 카테고리 + 인증 — 작은 메타 라인 */}
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-gray-100 pt-2.5 text-xs text-gray-400">

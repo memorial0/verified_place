@@ -37,6 +37,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // 개발환경 임시 우회: ADMIN_DEV_BYPASS=true 일 때만 인증 없이 통과.
+  // 프로덕션(NODE_ENV==='production')에선 플래그와 무관하게 절대 적용 안 됨 — fail-safe.
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.ADMIN_DEV_BYPASS === 'true'
+  ) {
+    return NextResponse.next()
+  }
+
   // supabase-ssr 권장 middleware 패턴 — req/res 쿠키를 양방향 동기화해
   // 세션이 자동 갱신될 때 클라이언트 쿠키도 함께 갱신되도록.
   let response = NextResponse.next({ request: { headers: req.headers } })
@@ -61,13 +70,24 @@ export async function middleware(req: NextRequest) {
     },
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getUser() 는 세션이 없으면 user=null 을 돌려주지만, 네트워크/키/쿠키 문제로
+  // 예외를 던질 수도 있다. 예외가 그대로 새면 미들웨어가 401/500 으로 떨어지므로
+  // (이번 증상의 원인) 반드시 잡아서 '미로그인'으로 간주 → 로그인 페이지로 보낸다.
+  let user: { email?: string | null } | null = null
+  try {
+    const result = await supabase.auth.getUser()
+    user = result.data.user
+  } catch {
+    user = null
+  }
   const email = user?.email?.toLowerCase()
   const isAdmin = !!email && adminEmails().includes(email)
 
   if (!user) {
+    // /api/admin/* 는 페이지 redirect 대신 401 JSON — 클라이언트가 로그인 필요를 인지.
+    if (pathname.startsWith('/api/admin')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const url = req.nextUrl.clone()
     url.pathname = '/admin/login'
     url.searchParams.set('next', pathname)

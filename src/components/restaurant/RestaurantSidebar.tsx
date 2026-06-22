@@ -5,6 +5,7 @@ import type { Restaurant } from '@/lib/mock/restaurants'
 import type { FetchState } from '@/lib/hooks/useRestaurants'
 import type { RouteSummary, DirectionsErrorKind } from '@/lib/api/directions'
 import type { Locale } from '@/lib/i18n/display'
+import { t } from '@/lib/i18n/ui'
 import { RestaurantCard } from './RestaurantCard'
 import { RestaurantDetail } from './RestaurantDetail'
 import { CoursePanel, type StartMode } from './CoursePanel'
@@ -128,7 +129,8 @@ export function RestaurantSidebar({
     <>
       <div className="flex items-center justify-between px-4 py-3">
         <p className="text-sm font-bold text-gray-700">
-          검증 식당 <span className="text-gray-400">{restaurants.length}곳</span>
+          {t(locale, 'places')}{' '}
+          <span className="text-gray-400">{restaurants.length}</span>
           {savedCount > 0 && (
             <span className="ml-2 text-amber-500">★ {savedCount}</span>
           )}

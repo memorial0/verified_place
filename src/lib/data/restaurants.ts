@@ -11,6 +11,7 @@ import blueRibbonGeo from './blue-ribbon.geocoded.json'
 import goodPriceCc from './good-price-chuncheon.geocoded.json'
 import centennialCc from './centennial-chuncheon.geocoded.json'
 import blueRibbonCc from './blue-ribbon-chuncheon.geocoded.json'
+import { VISITOR_PILOT } from './visitor-pilot'
 import {
   RESTAURANTS as DEMO,
   type Restaurant,
@@ -226,9 +227,51 @@ const DEMO_OTHER = DEMO.filter(
     ),
 )
 
+// 외국인 어메니티 데모 오버레이 — ⚠️ Supabase 미연결 로컬 폴백에서 기능을
+// 눈으로 확인하기 위한 가상 값. 실데이터는 restaurants.amenities(0012) 에서 온다.
+// 춘천 식당 일부에 순환 패턴으로 부여(앞 6곳)해 필터/배지 동작만 시연한다.
+const AMENITY_DEMO_PATTERN: Array<NonNullable<Restaurant['amenities']>> = [
+  { english_menu: true, overseas_card: true, group_friendly: true },
+  { english_menu: true, english_support: true, vegetarian: true },
+  { overseas_card: true, group_friendly: true },
+  { english_menu: true, halal_friendly: true, overseas_card: true },
+  { vegetarian: true, group_friendly: true },
+  { english_menu: true, english_support: true, overseas_card: true, vegetarian: true },
+]
+const CHUNCHEON_WITH_DEMO_AMENITIES = CHUNCHEON_RESTAURANTS.map((r, i) =>
+  i < AMENITY_DEMO_PATTERN.length ? { ...r, amenities: AMENITY_DEMO_PATTERN[i] } : r,
+)
+
+// 외국인 방문객 파일럿(visitor_ready) 로컬 폴백 오버레이.
+// 실데이터는 0014_seed_visitor_pilot.sql(id 기준). 여기선 이름 매칭으로 동일 노트를
+// 붙이고, 매칭이 부족하면 앞쪽 춘천 식당으로 채워 로컬 데모에서도 ~20곳이 노출되게 한다.
+const VISITOR_TARGET = 20
+const CHUNCHEON_VISITOR = (() => {
+  const withPilot = CHUNCHEON_WITH_DEMO_AMENITIES.map((r) => {
+    const p = VISITOR_PILOT[r.name.trim()]
+    return p
+      ? {
+          ...r,
+          visitorReady: true,
+          visitorNoteEn: p.noteEn,
+          foodWarningEn: p.warningEn,
+          recommendedSituation: p.situation,
+          venueArea: p.area,
+        }
+      : r
+  })
+  // 이름 매칭이 적으면(폴백 데이터셋은 라이브의 부분집합) 앞쪽에서 보충.
+  let count = withPilot.filter((r) => r.visitorReady).length
+  return withPilot.map((r) => {
+    if (r.visitorReady || count >= VISITOR_TARGET) return r
+    count++
+    return { ...r, visitorReady: true }
+  })
+})()
+
 export const RESTAURANT_DATASET: Restaurant[] = [
   ...MICHELIN_RESTAURANTS,
   ...BLUE_RIBBON_ONLY,
-  ...CHUNCHEON_RESTAURANTS,
+  ...CHUNCHEON_VISITOR,
   ...DEMO_OTHER,
 ]

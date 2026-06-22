@@ -17,7 +17,7 @@ export default async function AdminEditPage({ params }: { params: Params }) {
   const { data, error } = await admin
     .from('restaurants')
     .select(
-      'id, name, branch_name, phone, tagline, reason_to_visit, description, business_hours, status',
+      'id, name, branch_name, phone, tagline, reason_to_visit, description, business_hours, amenities, status',
     )
     .eq('id', id)
     .maybeSingle()
@@ -42,6 +42,7 @@ export default async function AdminEditPage({ params }: { params: Params }) {
           reason_to_visit: data.reason_to_visit,
           description: data.description,
           business_hours: data.business_hours,
+          amenities: data.amenities,
           status: data.status,
         }}
       />

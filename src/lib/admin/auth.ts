@@ -20,6 +20,17 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 }
 
 /**
+ * 개발환경 임시 우회 여부. ADMIN_DEV_BYPASS=true 이고 NODE_ENV 가 production 이
+ * 아닐 때만 true. 프로덕션에선 플래그 무시 — fail-safe. middleware 의 동일 조건과 1:1.
+ */
+export function isAdminDevBypass(): boolean {
+  return (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.ADMIN_DEV_BYPASS === 'true'
+  )
+}
+
+/**
  * 현재 세션의 admin 사용자 반환. 미로그인/비-admin 이면 null.
  * 서버 컴포넌트와 route handler 양쪽에서 사용.
  *
@@ -27,9 +38,18 @@ export function isAdminEmail(email: string | null | undefined): boolean {
  * 위해 라우트 핸들러도 이 함수로 한 번 더 확인한다.
  */
 export async function getAdminUser(): Promise<{ id: string; email: string } | null> {
+  // 개발 우회: 합성 admin 사용자 반환 → layout 헤더/편집 라우트가 로그인 없이 동작.
+  if (isAdminDevBypass()) {
+    return { id: 'dev-bypass', email: adminEmails()[0] ?? 'dev@localhost' }
+  }
   const supabase = await createClient()
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data.user || !data.user.email) return null
-  if (!isAdminEmail(data.user.email)) return null
-  return { id: data.user.id, email: data.user.email }
+  // 세션 미존재는 정상(null), 그 외 예외도 미인증으로 수렴시켜 호출부가 깨지지 않게.
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (error || !data.user || !data.user.email) return null
+    if (!isAdminEmail(data.user.email)) return null
+    return { id: data.user.id, email: data.user.email }
+  } catch {
+    return null
+  }
 }

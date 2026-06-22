@@ -17,11 +17,18 @@ export const REGION_OPTIONS: { value: Region; label: string; sido?: string }[] =
 ]
 
 /**
+ * 2026 세계태권도품새선수권 대회장 — 춘천 송암스포츠타운 (근사 좌표).
+ * 외국인 방문객 서비스의 지도 기본 중심. 정확 좌표 확보 시 이 한 곳만 수정.
+ */
+export const CHUNCHEON_VENUE_CENTER = { lat: 37.8530, lng: 127.7060 }
+
+/**
  * 지역 변경 시 지도 panTo 좌표. 'all' 은 사용자 시야를 유지(이동 안 함).
- * chuncheon 좌표는 RestaurantMap.DEFAULT_CENTER 와 동일 — 첫 마운트는 시각 변화 0.
+ * chuncheon 좌표 = 대회장 중심(CHUNCHEON_VENUE_CENTER) — RestaurantMap.DEFAULT_CENTER 와
+ * 동일하게 맞춰 첫 마운트 시 시각 변화 0.
  */
 export const REGION_CENTERS: Record<Exclude<Region, 'all'>, { lat: number; lng: number }> = {
-  chuncheon: { lat: 37.8813, lng: 127.7300 },
+  chuncheon: CHUNCHEON_VENUE_CENTER,
   seoul:     { lat: 37.5663, lng: 126.9779 },
 }
 

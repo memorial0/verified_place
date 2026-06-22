@@ -6,6 +6,9 @@ import {
 import type { RouteSummary } from '@/lib/api/directions'
 import { displayName, type Locale } from '@/lib/i18n/display'
 import { VerificationBadge } from './VerificationBadge'
+import { AmenityBadges } from './AmenityBadges'
+import { activeAmenities } from '@/lib/amenities'
+import { situationLabel, venueAreaLabel } from '@/lib/visitor'
 import { VerificationMetaPanel } from './VerificationMetaPanel'
 import { OpenStatusBadge } from './OpenStatusBadge'
 import { WeeklyHours } from './WeeklyHours'
@@ -107,6 +110,50 @@ export function RestaurantDetail({
             <p className="mb-1 font-bold text-gray-900">이 곳을 가야 하는 이유</p>
             {restaurant.reason}
           </div>
+        )}
+
+        {/* 4.3) 외국인 방문객용 영어 설명·주의 + 상황/지역대 태그 */}
+        {(restaurant.visitorNoteEn ||
+          restaurant.foodWarningEn ||
+          situationLabel(restaurant.recommendedSituation, locale) ||
+          venueAreaLabel(restaurant.venueArea, locale)) && (
+          <section className="mt-4 space-y-2">
+            {(situationLabel(restaurant.recommendedSituation, locale) ||
+              venueAreaLabel(restaurant.venueArea, locale)) && (
+              <div className="flex flex-wrap gap-1.5">
+                {venueAreaLabel(restaurant.venueArea, locale) && (
+                  <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
+                    📍 {venueAreaLabel(restaurant.venueArea, locale)}
+                  </span>
+                )}
+                {situationLabel(restaurant.recommendedSituation, locale) && (
+                  <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
+                    {situationLabel(restaurant.recommendedSituation, locale)}
+                  </span>
+                )}
+              </div>
+            )}
+            {restaurant.visitorNoteEn && (
+              <p className="text-sm leading-relaxed text-gray-700">
+                {restaurant.visitorNoteEn}
+              </p>
+            )}
+            {restaurant.foodWarningEn && (
+              <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium leading-relaxed text-amber-700">
+                ⚠️ {restaurant.foodWarningEn}
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* 4.5) 외국인 어메니티 (보유한 것만) */}
+        {activeAmenities(restaurant.amenities).length > 0 && (
+          <section className="mt-5">
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+              {locale === 'ko' ? '외국인 편의' : 'Good for visitors'}
+            </h3>
+            <AmenityBadges amenities={restaurant.amenities} locale={locale} variant="full" />
+          </section>
         )}
 
         {/* 5) 인증 뱃지 + 인증별 metadata (있는 인증만) */}

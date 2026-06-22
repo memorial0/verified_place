@@ -15,12 +15,15 @@ import {
   type DirectionsResult,
   type LatLng,
 } from '@/lib/api/directions'
-import { optimizeCourseOrder, type OptimizeOptions } from '@/lib/course/order'
+import { optimizeCourseOrder, haversineMeters, type OptimizeOptions } from '@/lib/course/order'
 import type { StartMode } from './CoursePanel'
 import { type Locale } from '@/lib/i18n/display'
-import { filterByRegion, type Region } from '@/lib/region/region'
+import { t } from '@/lib/i18n/ui'
+import { filterByRegion, CHUNCHEON_VENUE_CENTER, type Region } from '@/lib/region/region'
+import { matchesAmenities, type AmenityKey } from '@/lib/amenities'
 import { FilterChips } from './FilterChips'
-import { RegionChips } from './RegionChips'
+import { AmenityFilter } from './AmenityFilter'
+import { QuickActions, type QuickPreset } from './QuickActions'
 import { RestaurantSidebar } from './RestaurantSidebar'
 import { RestaurantMap } from './RestaurantMap'
 import { RestaurantMiniSheet } from './RestaurantMiniSheet'
@@ -46,32 +49,59 @@ const maxCourseHouses = (mode: StartMode) =>
  *   🧭 배지 클릭 → showCourse (사이드바 내 코스 패널)
  *   hover       → hoverId (마커 강조 + 정보 팝업)
  */
-export function MapExplorer() {
-  // ─── 로케일 ──────────────────────────────────────────────────────────────
-  // 임시 상수 (ko 고정). 헬퍼가 ko 분기로 떨어지므로 displayName(r, locale) === r.name.
-  //
-  // 로케일 전환 UX 도입 시 이 줄만 교체:
-  //   (가) URL 기반:  usePathname()/useSearchParams() 로 /en|/ja|/zh 또는 ?lang= 파싱
-  //   (나) Context:  layout.tsx 에 LocaleProvider 후 const locale = useLocale()
-  // 자식 컴포넌트(Sidebar/Map/MiniSheet) 시그니처는 그대로 둔다.
-  const locale: Locale = 'ko'
+/** 기본 상태(필터 없음)에서 지도/리스트에 노출할 추천 식당 최대 수. */
+const RECOMMENDED_LIMIT = 20
+/** '대회장 근처' 프리셋 반경(m). */
+const NEAR_VENUE_RADIUS = 2500
 
-  // ─── 지역 ────────────────────────────────────────────────────────────────
-  // 춘천 거점 제품 기본값. 새로고침 시 항상 chuncheon 으로 초기화(MVP).
-  // 추후 URL/localStorage 동기화는 별도 PR.
-  const [region, setRegion] = useState<Region>('chuncheon')
+const venueDist = (r: Restaurant) =>
+  haversineMeters(CHUNCHEON_VENUE_CENTER, { lat: r.lat, lng: r.lng })
+
+export function MapExplorer({ locale }: { locale: Locale }) {
+  // ─── 지역: 춘천 전용(MVP) ─────────────────────────────────────────────────
+  // 전국·서울 탭은 제거. 항상 춘천만 대상으로 운영한다.
+  const region: Region = 'chuncheon'
   const [filter, setFilter] = useState<FilterValue>('all')
+  // 외국인 어메니티 필터(AND 다중선택). 인증 필터와 독립 축.
+  const [amenityFilter, setAmenityFilter] = useState<AmenityKey[]>([])
+  // '대회장 근처' 프리셋 — 송암스포츠타운 반경 내만.
+  const [nearVenue, setNearVenue] = useState(false)
+  // '전체 춘천 검색' 확장 — 기본은 visitor_ready(추천) 풀만, 켜면 춘천 전체로 확장.
+  const [expandAll, setExpandAll] = useState(false)
   const { restaurants: allRestaurants, state } = useRestaurants()
 
-  // 클라이언트 2단계 필터링:
-  //   allRestaurants → RegionChips 가 cross-region 카운트 (전국/춘천/서울)
-  //   regionScoped   → FilterChips 가 region 내 검증 카운트
-  //   displayed      → 지도/사이드바 표시 데이터
-  const regionScoped = filterByRegion(allRestaurants, region)
-  const displayed =
+  // 클라이언트 필터링 파이프라인 (춘천 고정):
+  //   chuncheon    → 춘천 식당 전체(169).
+  //   visitorReady → 외국인 방문객 추천(파일럿) 식당. 초기 노출 풀.
+  //   pool         → 기본 visitorReady, '전체 검색' 토글 시 chuncheon 전체로 확장.
+  //                  (시드 미적용으로 visitorReady 가 비면 안전하게 전체로 폴백.)
+  //   verifScoped  → 인증 필터 적용. 어메니티 카운트 모수.
+  //   matched      → 어메니티 AND + 대회장 근처까지 적용한 "조건 일치" 집합.
+  //   displayed    → 필터가 하나도 없으면 추천 20곳으로 제한, 있으면 일치 전부.
+  //                  지도 마커 = 사이드바 리스트 = displayed (항상 동기화).
+  const chuncheon = filterByRegion(allRestaurants, region)
+  const visitorReady = chuncheon.filter((r) => r.visitorReady)
+  const hasVisitorData = visitorReady.length > 0
+  const pool = expandAll || !hasVisitorData ? chuncheon : visitorReady
+  const verifScoped =
     filter === 'all'
-      ? regionScoped
-      : regionScoped.filter((r) => r.verifications.some((v) => v.code === filter))
+      ? pool
+      : pool.filter((r) => r.verifications.some((v) => v.code === filter))
+  const matched = verifScoped.filter(
+    (r) =>
+      matchesAmenities(r.amenities, amenityFilter) &&
+      (!nearVenue || venueDist(r) <= NEAR_VENUE_RADIUS),
+  )
+  const anyFilterActive = filter !== 'all' || amenityFilter.length > 0 || nearVenue
+  // 추천 정렬: 외국인 어메니티 많은 곳 우선 → 대회장 가까운 순.
+  const recommended = [...matched]
+    .sort((a, b) => {
+      const am = (r: Restaurant) => (r.amenities ? Object.values(r.amenities).filter(Boolean).length : 0)
+      return am(b) - am(a) || venueDist(a) - venueDist(b)
+    })
+    .slice(0, RECOMMENDED_LIMIT)
+  // 기본(추천)에서는 20곳 제한. 필터 적용 또는 '전체 검색' 확장 시엔 일치 전부 표시.
+  const displayed = anyFilterActive || expandAll ? matched : recommended
   const { isSaved, toggle: toggleSave, savedCount } = useSavedRestaurants()
   const course = useCourse()
 
@@ -115,6 +145,36 @@ export function MapExplorer() {
     setStartFellBack(false)
     setRoute((r) => (r && r.destId === null ? null : r))
   }, [course.items, startMode])
+
+  // 대회 방문객용 빠른 선택 — 관련 필터 적용 또는 해당 섹션으로 이동.
+  const applyQuick = (preset: QuickPreset) => {
+    setHoverId(null)
+    setPreviewId(null)
+    switch (preset) {
+      case 'eat': // 주문 가능한 곳 = 영어 메뉴
+        setNearVenue(false); setFilter('all'); setAmenityFilter(['english_menu']); break
+      case 'venue':
+        setFilter('all'); setAmenityFilter([]); setNearVenue((v) => !v); break
+      case 'team':
+        setNearVenue(false); setFilter('all'); setAmenityFilter(['group_friendly']); break
+      case 'veg':
+        setNearVenue(false); setFilter('all'); setAmenityFilter(['vegetarian']); break
+      case 'english':
+        setNearVenue(false); setFilter('all'); setAmenityFilter(['english_support']); break
+      case 'tour': // 짧은 코스 = 내 코스 패널 열기
+        setShowCourse(true); break
+    }
+  }
+
+  // 빠른 선택 버튼의 활성 표시용 — 현재 단일 어메니티만 선택된 상태인지.
+  const onlyAmenity = (k: AmenityKey) => amenityFilter.length === 1 && amenityFilter[0] === k
+  const activePresets: Partial<Record<QuickPreset, boolean>> = {
+    eat: onlyAmenity('english_menu'),
+    venue: nearVenue,
+    team: onlyAmenity('group_friendly'),
+    veg: onlyAmenity('vegetarian'),
+    english: onlyAmenity('english_support'),
+  }
 
   // 마커 클릭 → 미니 바텀시트 미리보기
   const handlePreview = (id: string | null) => {
@@ -233,24 +293,66 @@ export function MapExplorer() {
   return (
     <div className="flex h-full flex-col">
       <div className="z-10 shrink-0 overflow-x-auto border-b border-gray-100 bg-white/80 px-4 py-2.5 backdrop-blur">
-        <div className="flex flex-col gap-2">
-          <RegionChips
-            active={region}
-            onChange={(r) => {
-              setRegion(r)
-              setHoverId(null)
-              setPreviewId(null)
-            }}
-            restaurants={allRestaurants}
-          />
-          <FilterChips
-            active={filter}
-            onChange={(v) => {
-              setFilter(v)
-              setHoverId(null)
-            }}
-            restaurants={regionScoped}
-          />
+        <div className="flex flex-col gap-2.5">
+          {/* 1) 대회 방문객용 빠른 선택 */}
+          <QuickActions locale={locale} active={activePresets} onSelect={applyQuick} />
+
+          {/* 2) 외국인 편의 필터 (우선 노출) */}
+          <div>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
+              {t(locale, 'forVisitors')}
+            </p>
+            <AmenityFilter
+              active={amenityFilter}
+              onChange={(next) => {
+                setAmenityFilter(next)
+                setHoverId(null)
+              }}
+              restaurants={verifScoped}
+              locale={locale}
+            />
+          </div>
+
+          {/* 3) 인증 필터 (보조) */}
+          <details className="group">
+            <summary className="cursor-pointer list-none text-[11px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600">
+              {t(locale, 'verifiedBy')} <span className="font-normal">▾</span>
+            </summary>
+            <div className="mt-1.5">
+              <FilterChips
+                active={filter}
+                onChange={(v) => {
+                  setFilter(v)
+                  setHoverId(null)
+                }}
+                restaurants={chuncheon}
+              />
+            </div>
+          </details>
+
+          {/* 4) 현재 표시 안내 + 전체 검색 확장 토글 */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-gray-500">
+              {nearVenue
+                ? t(locale, 'resultsNear')
+                : !anyFilterActive
+                  ? t(locale, 'recommendedNote')
+                  : ''}
+              <span className="ml-1 font-bold text-gray-700">· {displayed.length}</span>
+            </p>
+            {hasVisitorData && (
+              <button
+                type="button"
+                onClick={() => {
+                  setExpandAll((v) => !v)
+                  setHoverId(null)
+                }}
+                className="shrink-0 rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-800"
+              >
+                {expandAll ? t(locale, 'pilotOnly') : `${t(locale, 'searchAll')} (${chuncheon.length})`}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

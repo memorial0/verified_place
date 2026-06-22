@@ -2,6 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import {
+  AMENITY_OPTIONS,
+  AMENITY_KEYS,
+  type AmenityKey,
+} from '@/lib/amenities'
 
 interface RestaurantRow {
   id: string
@@ -12,6 +17,7 @@ interface RestaurantRow {
   reason_to_visit: string | null
   description: string | null
   business_hours: Record<string, unknown> | null
+  amenities: Record<string, unknown> | null
   status: string
 }
 
@@ -67,6 +73,14 @@ export function RestaurantEditForm({ restaurant }: Props) {
   })
   const [hoursNote, setHoursNote] = useState(initStr('note'))
 
+  // 어메니티 — 6개 키 전부 boolean 으로 관리(누락 키는 false). 저장 시 그대로 전송.
+  const initAmenities = (restaurant.amenities ?? {}) as Record<string, unknown>
+  const [amenities, setAmenities] = useState<Record<AmenityKey, boolean>>(() =>
+    Object.fromEntries(
+      AMENITY_KEYS.map((k) => [k, initAmenities[k] === true]),
+    ) as Record<AmenityKey, boolean>,
+  )
+
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<{
     kind: 'ok' | 'warn' | 'error'
@@ -118,6 +132,7 @@ export function RestaurantEditForm({ restaurant }: Props) {
       description: description.trim(),
       status,
       business_hours: cleanedHours,
+      amenities, // 6개 키 boolean 맵 그대로 — 서버가 허용 키/boolean 만 통과
     }
 
     try {
@@ -259,6 +274,32 @@ export function RestaurantEditForm({ restaurant }: Props) {
             placeholder="메모 (예: 라스트오더 30분 전)"
             className="mt-2 w-full rounded border border-gray-200 px-2 py-1 text-sm focus:border-gray-900 focus:outline-none"
           />
+        </div>
+      </Field>
+
+      <Field
+        label="외국인 편의 (amenities)"
+        hint="외국인 관광객용 어메니티. 체크한 항목만 사용자 카드/상세에 배지로 노출되고, 필터 대상이 됩니다."
+      >
+        <div className="grid grid-cols-1 gap-1.5 rounded-lg border border-gray-200 bg-white p-3 sm:grid-cols-2">
+          {AMENITY_OPTIONS.map((opt) => (
+            <label
+              key={opt.key}
+              className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <input
+                type="checkbox"
+                checked={amenities[opt.key]}
+                onChange={(e) =>
+                  setAmenities((a) => ({ ...a, [opt.key]: e.target.checked }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <span aria-hidden>{opt.icon}</span>
+              <span>{opt.label.en}</span>
+              <span className="text-xs text-gray-400">{opt.label.ko}</span>
+            </label>
+          ))}
         </div>
       </Field>
 

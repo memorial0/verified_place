@@ -10,12 +10,14 @@ import {
 import type { LatLng } from '@/lib/api/directions'
 import { haversineMeters } from '@/lib/course/order'
 import { displayName, type Locale } from '@/lib/i18n/display'
-import { REGION_CENTERS, type Region } from '@/lib/region/region'
+import { REGION_CENTERS, CHUNCHEON_VENUE_CENTER, type Region } from '@/lib/region/region'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
 import { getReactOverlayClass } from '@/lib/naver/overlay'
 
-// 춘천 거점 — 기본 지도 중심
-const DEFAULT_CENTER = { lat: 37.8813, lng: 127.73 }
+// 대회 방문객 거점 — 춘천 송암스포츠타운(대회장) 중심. region.ts 단일 출처 재사용.
+const DEFAULT_CENTER = CHUNCHEON_VENUE_CENTER
+// 대회장 중심 + 시내 주요 식당도 보이는 적당한 범위
+const DEFAULT_ZOOM = 13
 
 interface Props {
   restaurants: Restaurant[]
@@ -62,8 +64,12 @@ export function RestaurantMap({
 }: Props) {
   const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID ?? ''
   const { loaded, error } = useNaverMaps(clientId)
-  // naver 전역 타입에 의존하지 않도록 느슨하게 보관 (런타임에 window.naver 사용)
-  const naver = typeof window !== 'undefined' ? (window as any).naver : undefined
+  // naver 전역 타입에 의존하지 않도록 느슨하게 보관 (런타임에 window.naver 사용).
+  // ⚠️ 인증 부분실패(401) 시 window.naver 는 존재하나 naver.maps 가 비어 있을 수 있다.
+  //    그 경우 naver.maps.LatLng 등에서 전체 화면 크래시 → naver.maps 가 준비됐을
+  //    때만 truthy 로 노출해, 아래 모든 가드(!naver)와 자식 전달이 한 번에 안전해진다.
+  const naverGlobal = typeof window !== 'undefined' ? (window as any).naver : undefined
+  const naver = naverGlobal?.maps ? naverGlobal : undefined
 
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
@@ -82,7 +88,7 @@ export function RestaurantMap({
     try {
       mapRef.current = new naver.maps.Map(containerRef.current, {
         center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
-        zoom: 12,
+        zoom: DEFAULT_ZOOM,
       })
       naver.maps.Event.addListener(mapRef.current, 'click', () =>
         onClearRef.current(),

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getAdminUser } from '@/lib/admin/auth'
+import { AMENITY_KEYS } from '@/lib/amenities'
 
 export const runtime = 'edge'
 
@@ -37,7 +38,11 @@ const ALLOWED_TOP = new Set([
   'description',
   'status',
   'business_hours',
+  'amenities',
 ] as const)
+
+// 어메니티 키 화이트리스트 — lib/amenities 단일 출처. 그 외 키는 조용히 무시.
+const ALLOWED_AMENITY_KEYS = new Set<string>(AMENITY_KEYS)
 
 const ALLOWED_STATUS = new Set(['draft', 'published', 'archived', 'flagged'])
 
@@ -100,6 +105,19 @@ function normalizeHours(v: unknown): Record<string, string> {
   return filtered
 }
 
+// 어메니티: 허용 키 + boolean 값만 통과. business_hours 와 동일한 "느슨한 JSONB" 패턴.
+// 폼은 6개 키 전부 boolean 으로 보내므로 그대로 저장({ english_menu: true, ... }).
+function normalizeAmenities(v: unknown): Record<string, boolean> {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {}
+  const filtered: Record<string, boolean> = {}
+  for (const [ak, av] of Object.entries(v as Record<string, unknown>)) {
+    if (!ALLOWED_AMENITY_KEYS.has(ak)) continue
+    if (typeof av !== 'boolean') continue
+    filtered[ak] = av
+  }
+  return filtered
+}
+
 export async function PATCH(req: NextRequest, ctx: { params: Params }) {
   const user = await getAdminUser()
   if (!user) {
@@ -124,7 +142,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Params }) {
   const { data: current, error: readErr } = await admin
     .from('restaurants')
     .select(
-      'id, name, branch_name, tagline, reason_to_visit, phone, description, status, business_hours, updated_at',
+      'id, name, branch_name, tagline, reason_to_visit, phone, description, status, business_hours, amenities, updated_at',
     )
     .eq('id', id)
     .maybeSingle()
@@ -159,6 +177,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Params }) {
       newVal = v
     } else if (k === 'business_hours') {
       newVal = normalizeHours(v)
+    } else if (k === 'amenities') {
+      newVal = normalizeAmenities(v)
     } else {
       // nullable 문자열: branch_name / tagline / reason_to_visit / phone / description
       if (v === null) newVal = null

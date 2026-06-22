@@ -5,6 +5,7 @@
 // =============================================================================
 
 import type { OpeningHours } from '@/lib/hours/types'
+import type { Amenities } from '@/lib/amenities'
 import {
   VERIFICATION_META,
   getVerificationMeta,
@@ -72,6 +73,25 @@ export interface Restaurant {
 
   /** 영업시간 — Google Places 수집(opening_hours jsonb). 뱃지/주간표시에 사용. null=정보 없음. */
   openingHours?: OpeningHours
+
+  /**
+   * 외국인 관광객용 어메니티 (0012 amenities jsonb). 영어메뉴/해외카드/할랄 등.
+   * 인증과 다른 축 — admin 점진 보강. 비어 있으면 정보 없음(미보유 취급).
+   * 레지스트리/필터/배지는 lib/amenities 헬퍼 사용.
+   */
+  amenities?: Amenities
+
+  // ── 대회 방문객 시연용 메타 (0013_visitor_pilot) ────────────────────────────
+  /** 외국인 대회 방문객 우선 추천 대상인가. 초기 노출/지도는 true 만. */
+  visitorReady?: boolean
+  /** 외국인용 영어 설명 (식당 소개) */
+  visitorNoteEn?: string
+  /** 외국인용 영어 주의사항 (매운맛·돼지고기 등). 안전한 표현 유지. */
+  foodWarningEn?: string
+  /** 추천 상황 — lib/visitor RecommendedSituation 값 */
+  recommendedSituation?: string
+  /** 지역대 — lib/visitor VenueArea 값 */
+  venueArea?: string
 }
 
 // VERIFICATION_META / getVerificationMeta 는 src/lib/verifications.ts 로 이동(상단에서 재노출).

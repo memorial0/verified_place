@@ -1,6 +1,7 @@
 import { type Restaurant, type VerificationCode } from '@/lib/mock/restaurants'
 import { RESTAURANT_DATASET } from '@/lib/data/restaurants'
 import type { OpeningHours } from '@/lib/hours/types'
+import type { Amenities } from '@/lib/amenities'
 
 // ---- GET /api/restaurants 응답 형태 (snake_case, DB Row 기반) ----------------
 interface ApiVerification {
@@ -32,6 +33,12 @@ interface ApiRestaurant {
   tagline: string | null
   reason_to_visit: string | null
   opening_hours: OpeningHours
+  amenities: Amenities | null
+  visitor_ready: boolean | null
+  visitor_note_en: string | null
+  food_warning_en: string | null
+  recommended_situation: string | null
+  venue_area: string | null
   category: { slug: string; name_ko: string } | null
   verifications: ApiVerification[] | null
 }
@@ -52,6 +59,14 @@ export function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     sigungu: r.sigungu ?? undefined,
     phone: r.phone ?? undefined,
     openingHours: r.opening_hours ?? null,
+    // 빈 객체({})면 undefined 로 정규화 — UI 측 '어메니티 있음' 판정 단순화.
+    amenities:
+      r.amenities && Object.keys(r.amenities).length > 0 ? r.amenities : undefined,
+    visitorReady: r.visitor_ready ?? false,
+    visitorNoteEn: r.visitor_note_en ?? undefined,
+    foodWarningEn: r.food_warning_en ?? undefined,
+    recommendedSituation: r.recommended_situation ?? undefined,
+    venueArea: r.venue_area ?? undefined,
     verifications: (r.verifications ?? [])
       .filter((v) => v.type?.code)
       .map((v) => ({
