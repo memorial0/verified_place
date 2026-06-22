@@ -21,6 +21,7 @@ export type UiKey =
   | 'verifiedBy'
   | 'filterAll'
   | 'recommendedNote'
+  | 'recommendedNearYou'
   | 'resultsNear'
   | 'clear'
   | 'halalNote'
@@ -114,7 +115,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     forVisitors: 'For visitors',
     verifiedBy: 'Verified by',
     filterAll: 'All',
-    recommendedNote: 'Recommended spots near the venue',
+    recommendedNote: 'Recommended places',
+    recommendedNearYou: 'Recommended near you',
     resultsNear: 'Showing places near the venue',
     clear: 'Clear',
     halalNote: 'Muslim-friendly — please confirm ingredients',
@@ -202,7 +204,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     forVisitors: '訪問者向け',
     verifiedBy: '認証',
     filterAll: 'すべて',
-    recommendedNote: '会場周辺のおすすめ',
+    recommendedNote: 'おすすめのお店',
+    recommendedNearYou: 'あなたの近くのおすすめ',
     resultsNear: '会場周辺のお店を表示中',
     clear: 'クリア',
     halalNote: 'ムスリム対応の可能性あり・原材料をご確認ください',
@@ -290,7 +293,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     forVisitors: '访客便利',
     verifiedBy: '认证',
     filterAll: '全部',
-    recommendedNote: '会场周边推荐',
+    recommendedNote: '推荐餐厅',
+    recommendedNearYou: '您附近的推荐',
     resultsNear: '正在显示会场附近的餐厅',
     clear: '清除',
     halalNote: '穆斯林友好 / 请确认食材',
@@ -378,7 +382,8 @@ const UI: Record<Locale, Record<UiKey, string>> = {
     forVisitors: '외국인 편의',
     verifiedBy: '인증',
     filterAll: '전체',
-    recommendedNote: '대회장 인근 추천',
+    recommendedNote: '추천 식당',
+    recommendedNearYou: '내 주변 추천',
     resultsNear: '대회장 인근 식당 표시 중',
     clear: '초기화',
     halalNote: '무슬림 친화 / 재료 확인 필요',

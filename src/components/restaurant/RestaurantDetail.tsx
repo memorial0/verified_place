@@ -10,7 +10,7 @@ import { VerificationBadge } from './VerificationBadge'
 import { AmenityBadges } from './AmenityBadges'
 import { activeAmenities } from '@/lib/amenities'
 import { situationLabel, venueAreaLabel } from '@/lib/visitor'
-import { categoryLabel } from '@/lib/categories'
+import { categoryLabel, visibleTags } from '@/lib/categories'
 import { VerificationMetaPanel } from './VerificationMetaPanel'
 import { OpenStatusBadge } from './OpenStatusBadge'
 import { WeeklyHours } from './WeeklyHours'
@@ -82,10 +82,10 @@ export function RestaurantDetail({
           <OpenStatusBadge hours={restaurant.openingHours ?? null} />
         </div>
 
-        {/* 2) 대표 키워드 */}
-        {restaurant.keywords.length > 0 && (
+        {/* 2) 대표 키워드 (지역 태그 #춘천시는 표시에서 제외) */}
+        {visibleTags(restaurant.keywords, restaurant.sigungu).length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {restaurant.keywords.map((k) => (
+            {visibleTags(restaurant.keywords, restaurant.sigungu).map((k) => (
               <span
                 key={k}
                 className="rounded-full px-2.5 py-1 text-sm font-bold"

@@ -8,7 +8,7 @@ import {
 import { displayName, type Locale } from '@/lib/i18n/display'
 import { t } from '@/lib/i18n/ui'
 import { verificationLabel } from '@/lib/verifications'
-import { categoryLabel } from '@/lib/categories'
+import { categoryLabel, visibleTags } from '@/lib/categories'
 import { OpenStatusBadge } from './OpenStatusBadge'
 
 interface Props {
@@ -77,7 +77,7 @@ export function RestaurantMiniSheet({
               {verificationLabel(primary.code, locale)}
             </span>
           )}
-          {restaurant.keywords.slice(0, 2).map((k) => (
+          {visibleTags(restaurant.keywords, restaurant.sigungu).slice(0, 2).map((k) => (
             <span
               key={k}
               className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500"

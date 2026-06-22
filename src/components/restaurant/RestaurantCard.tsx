@@ -8,7 +8,7 @@ import { displayName, type Locale } from '@/lib/i18n/display'
 import { t } from '@/lib/i18n/ui'
 import { verificationLabel } from '@/lib/verifications'
 import { situationLabel, venueAreaLabel } from '@/lib/visitor'
-import { categoryLabel } from '@/lib/categories'
+import { categoryLabel, visibleTags } from '@/lib/categories'
 import { AmenityBadges } from './AmenityBadges'
 
 interface Props {
@@ -70,10 +70,10 @@ export const RestaurantCard = forwardRef<HTMLDivElement, Props>(
           {displayName(restaurant, locale)}
         </h3>
 
-        {/* 2) 대표 키워드 3개 */}
-        {restaurant.keywords.length > 0 && (
+        {/* 2) 대표 키워드 3개 (지역 태그 #춘천시는 표시에서 제외) */}
+        {visibleTags(restaurant.keywords, restaurant.sigungu).length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {restaurant.keywords.slice(0, 3).map((k) => (
+            {visibleTags(restaurant.keywords, restaurant.sigungu).slice(0, 3).map((k) => (
               <span
                 key={k}
                 className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600"

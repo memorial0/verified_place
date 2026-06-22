@@ -55,6 +55,10 @@ const maxCourseHouses = (mode: StartMode) =>
 const RECOMMENDED_LIMIT = 20
 /** '대회장 근처' 프리셋 반경(m). */
 const NEAR_VENUE_RADIUS = 2500
+/** 추천 정렬 시 visitor_ready 식당에 주는 거리 가산점(m) — 주변 우선이되 추천 식당을 살짝 우대. */
+const VISITOR_BOOST_M = 800
+/** userLoc 을 신뢰할 반경(m) — 춘천 밖 좌표(헤드리스/엉뚱한 IP위치)는 무시하고 대회장 폴백. */
+const USER_LOC_MAX_M = 50000
 
 const venueDist = (r: Restaurant) =>
   haversineMeters(CHUNCHEON_VENUE_CENTER, { lat: r.lat, lng: r.lng })
@@ -93,30 +97,47 @@ export function MapExplorer({ locale }: { locale: Locale }) {
   const [amenityFilter, setAmenityFilter] = useState<AmenityKey[]>([])
   // '대회장 근처' 프리셋 — 송암스포츠타운 반경 내만.
   const [nearVenue, setNearVenue] = useState(false)
-  // '전체 춘천 검색' 확장 — 기본은 visitor_ready(추천) 풀만, 켜면 춘천 전체로 확장.
+  // '전체 춘천 검색' 확장 — 기본은 주변 추천 20곳, 켜면 일치 전부(20 제한 해제).
   const [expandAll, setExpandAll] = useState(false)
-  // 검색어 — 기본은 visitor_ready 풀 안에서, expandAll 시 춘천 전체에서 검색.
+  // 검색어 — 춘천 전체에서 검색.
   const [query, setQuery] = useState('')
   const hasQuery = query.trim().length > 0
+  // 사용자 현재 위치 — 입장 시 1회 시도(거부/실패 시 null). 주변 추천 정렬 기준.
+  const [userLoc, setUserLoc] = useState<LatLng | null>(null)
   const { restaurants: allRestaurants, state } = useRestaurants()
 
-  // 클라이언트 필터링 파이프라인 (춘천 고정):
-  //   chuncheon    → 춘천 식당 전체(169).
-  //   visitorReady → 외국인 방문객 추천(파일럿) 식당. 초기 노출 풀.
-  //   pool         → 기본 visitorReady, '전체 검색' 토글 시 chuncheon 전체로 확장.
-  //                  (시드 미적용으로 visitorReady 가 비면 안전하게 전체로 폴백.)
-  //   verifScoped  → 인증 필터 적용. 어메니티 카운트 모수.
-  //   matched      → 어메니티 AND + 대회장 근처까지 적용한 "조건 일치" 집합.
-  //   displayed    → 필터가 하나도 없으면 추천 20곳으로 제한, 있으면 일치 전부.
-  //                  지도 마커 = 사이드바 리스트 = displayed (항상 동기화).
+  useEffect(() => {
+    let cancelled = false
+    getCurrentPosition()
+      .then((p) => {
+        if (!cancelled) setUserLoc(p)
+      })
+      .catch(() => {
+        /* 권한 거부/미지원 — 대회장 중심으로 폴백 */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // 정렬 기준 위치: 사용자 위치(춘천 인근일 때만) → 없으면 대회장 중심으로 조용히 폴백.
+  const nearChuncheon =
+    !!userLoc && haversineMeters(CHUNCHEON_VENUE_CENTER, userLoc) < USER_LOC_MAX_M
+  const rankOrigin = nearChuncheon ? userLoc! : CHUNCHEON_VENUE_CENTER
+  const rankDist = (r: Restaurant) =>
+    haversineMeters(rankOrigin, { lat: r.lat, lng: r.lng })
+
+  // 클라이언트 필터링 파이프라인 (춘천 전체 기준):
+  //   chuncheon   → 춘천 식당 전체. 기본 풀도 전체 → visitor_ready 22곳에 갇히지 않음.
+  //   verifScoped → 인증 필터 적용. 어메니티 카운트 모수.
+  //   matched     → 어메니티 AND + 대회장 근처 + 검색까지 적용한 "조건 일치" 집합.
+  //   displayed   → 필터/검색 없으면 '주변 추천' 20곳, 있으면 일치 전부.
+  //                 지도 마커 = 사이드바 리스트 = displayed (항상 동기화).
   const chuncheon = filterByRegion(allRestaurants, region)
-  const visitorReady = chuncheon.filter((r) => r.visitorReady)
-  const hasVisitorData = visitorReady.length > 0
-  const pool = expandAll || !hasVisitorData ? chuncheon : visitorReady
   const verifScoped =
     filter === 'all'
-      ? pool
-      : pool.filter((r) => r.verifications.some((v) => v.code === filter))
+      ? chuncheon
+      : chuncheon.filter((r) => r.verifications.some((v) => v.code === filter))
   const matched = verifScoped.filter(
     (r) =>
       matchesAmenities(r.amenities, amenityFilter) &&
@@ -125,14 +146,12 @@ export function MapExplorer({ locale }: { locale: Locale }) {
   )
   const anyFilterActive =
     filter !== 'all' || amenityFilter.length > 0 || nearVenue || hasQuery
-  // 추천 정렬: 외국인 어메니티 많은 곳 우선 → 대회장 가까운 순.
+  // 추천 정렬: 가까운 순(주변 위주) + visitor_ready 가산점(추천 식당 살짝 우대, 독점 아님).
+  const score = (r: Restaurant) => rankDist(r) - (r.visitorReady ? VISITOR_BOOST_M : 0)
   const recommended = [...matched]
-    .sort((a, b) => {
-      const am = (r: Restaurant) => (r.amenities ? Object.values(r.amenities).filter(Boolean).length : 0)
-      return am(b) - am(a) || venueDist(a) - venueDist(b)
-    })
+    .sort((a, b) => score(a) - score(b))
     .slice(0, RECOMMENDED_LIMIT)
-  // 기본(추천)에서는 20곳 제한. 필터 적용 또는 '전체 검색' 확장 시엔 일치 전부 표시.
+  // 기본(추천)에서는 20곳 제한. 필터/검색/전체검색이면 일치 전부 표시.
   const displayed = anyFilterActive || expandAll ? matched : recommended
   const { isSaved, toggle: toggleSave, savedCount } = useSavedRestaurants()
   const course = useCourse()
@@ -397,22 +416,20 @@ export function MapExplorer({ locale }: { locale: Locale }) {
               {nearVenue
                 ? t(locale, 'resultsNear')
                 : !anyFilterActive
-                  ? t(locale, 'recommendedNote')
+                  ? t(locale, nearChuncheon ? 'recommendedNearYou' : 'recommendedNote')
                   : ''}
               <span className="ml-1 font-bold text-gray-700">· {displayed.length}</span>
             </p>
-            {hasVisitorData && (
-              <button
-                type="button"
-                onClick={() => {
-                  setExpandAll((v) => !v)
-                  setHoverId(null)
-                }}
-                className="shrink-0 rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-800"
-              >
-                {expandAll ? t(locale, 'pilotOnly') : `${t(locale, 'searchAll')} (${chuncheon.length})`}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setExpandAll((v) => !v)
+                setHoverId(null)
+              }}
+              className="shrink-0 rounded-full border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-800"
+            >
+              {expandAll ? t(locale, 'pilotOnly') : `${t(locale, 'searchAll')} (${chuncheon.length})`}
+            </button>
           </div>
         </div>
       </div>
@@ -459,6 +476,7 @@ export function MapExplorer({ locale }: { locale: Locale }) {
             restaurants={displayed}
             locale={locale}
             region={region}
+            recenter={nearChuncheon ? userLoc : null}
             activeId={activeId}
             selectedId={previewId ?? selectedId}
             previewId={previewId}

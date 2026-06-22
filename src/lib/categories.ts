@@ -32,3 +32,12 @@ export function categoryLabel(value: string | undefined | null, locale: Locale):
   const m = CATEGORY_LABEL[value.trim()]
   return m ? (m[locale] ?? m.en) : value
 }
+
+/**
+ * 화면에 보일 키워드 태그.
+ * 지금은 전 식당이 춘천이라 지역(sigungu) 태그 '#춘천시'가 100% 중복 → 표시에서 제외.
+ * 데이터(keywords)는 그대로 두므로, 다지역 확장 시 이 필터만 제거하면 다시 노출된다.
+ */
+export function visibleTags(keywords: string[], sigungu?: string): string[] {
+  return keywords.filter((k) => k !== sigungu)
+}

@@ -11,7 +11,7 @@ import type { LatLng } from '@/lib/api/directions'
 import { haversineMeters } from '@/lib/course/order'
 import { displayName, type Locale } from '@/lib/i18n/display'
 import { t } from '@/lib/i18n/ui'
-import { categoryLabel } from '@/lib/categories'
+import { categoryLabel, visibleTags } from '@/lib/categories'
 import { REGION_CENTERS, CHUNCHEON_VENUE_CENTER, type Region } from '@/lib/region/region'
 import { useNaverMaps } from '@/lib/hooks/useNaverMaps'
 import { getReactOverlayClass } from '@/lib/naver/overlay'
@@ -27,6 +27,8 @@ interface Props {
   locale: Locale
   /** 지역 — 변경 시 해당 거점 좌표로 panTo. 'all' 은 이동하지 않음 */
   region: Region
+  /** 지도 재중심 좌표(예: 사용자 위치). 설정되면 그쪽으로 panTo. null 이면 무시 */
+  recenter?: LatLng | null
   /** 오버레이/강조 대상 (hover ?? preview ?? selected) */
   activeId: string | null
   /** panTo 대상 (preview ?? selected) */
@@ -53,6 +55,7 @@ export function RestaurantMap({
   restaurants,
   locale,
   region,
+  recenter,
   activeId,
   selectedId,
   previewId,
@@ -120,6 +123,12 @@ export function RestaurantMap({
     const center = REGION_CENTERS[region]
     mapRef.current.panTo(new naver.maps.LatLng(center.lat, center.lng))
   }, [region, naver])
+
+  // 사용자 위치가 확보되면 그쪽으로 재중심(주변 추천과 지도 시야 일치).
+  useEffect(() => {
+    if (!recenter || !mapRef.current || !naver) return
+    mapRef.current.panTo(new naver.maps.LatLng(recenter.lat, recenter.lng))
+  }, [recenter, naver])
 
   // 경로가 생기면 출발지+도착지가 모두 보이도록 지도 범위 맞춤
   useEffect(() => {
@@ -621,9 +630,9 @@ function PopupCard({
         </button>
 
         <h3 className="pr-6 text-base font-bold text-gray-900">{displayName(restaurant, locale)}</h3>
-        {restaurant.keywords.length > 0 && (
+        {visibleTags(restaurant.keywords, restaurant.sigungu).length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
-            {restaurant.keywords.slice(0, 3).map((k) => (
+            {visibleTags(restaurant.keywords, restaurant.sigungu).slice(0, 3).map((k) => (
               <span
                 key={k}
                 className="inline-block rounded px-1.5 py-0.5 text-xs font-bold"
